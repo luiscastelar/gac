@@ -4,6 +4,7 @@ from html.parser import HTMLParser
 import re                   # Expresionse regulares
 import networkx as nx       # generador de grafos
 import graphviz             # para dibujar el grafo
+import os
 
 # Constantes
 TAB = 4                     # para la impresión del DOM
@@ -165,7 +166,8 @@ def generarGraphml(DOM):
     #A.draw('salida.png') # guardar como png
     
 
-def addNodoG(salida, nodo):
+def addNodoG(nodo):
+    grafo = ''
     idNodo = f'{nodo.nombre}_{nodo.uid}'
     
     # Por defecto queremos rojo las cajas de texto y azul lo demás
@@ -214,25 +216,35 @@ def addNodoG(salida, nodo):
     '''
 
     # Generación Graph.dot
-    salida += f'{idNodo} [{getAtributos(nodo.atributos)}]\n'
+    grafo += f'{idNodo} [{getAtributos(nodo.atributos)}]\n'
 
     
 
     # recorremos los hijos de forma recursiva
     for hijo in nodo.hijos:
-        addNodoG(salida, hijo)
+        grafo += addNodoG(hijo)
         idNodoHijo = f'{hijo.nombre}_{hijo.uid}'
         #grafo.add_edge(idNodo, idNodoHijo)
-        addEdgeG(salida, idNodo, idNodoHijo)
+        grafo += addEdgeG(idNodo, idNodoHijo)
 
+    return grafo
 
-def addEdgeG(salida, nodo, hijo):
-    salida += f'{nodo}->{hijo}\n'
+def addEdgeG(nodo, hijo):
+    return f'{nodo}->{hijo}\n'
 
 def encabezado():
     match tipoDeGrafico:
         case 'dot':
-            return ''
+            return '''digraph G {
+  charset="UTF-8"
+  '''
+        case _:
+            raise Exception('Tipo de gráfico NO válido')
+
+def cierre():
+    match tipoDeGrafico:
+        case 'dot':
+            return '}'
         case _:
             raise Exception('Tipo de gráfico NO válido')
 
@@ -243,6 +255,14 @@ def getAtributos(atributos):
         salida += f'{att[0]}="{att[1]}"\n'
     return salida
     
+
+def robust_write(text, filepath):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(text)
+    except IOError as e:
+        print(f'Write failed: {e}')
 
 
 # Main()
@@ -284,8 +304,10 @@ def main():
     
     print('='*ANCHO)
     salida = encabezado()
-    addNodoG(salida, root)
+    salida += addNodoG(root)
+    salida += cierre()
     print(f'Salida:\n{salida}')
+    robust_write(salida, './salida.dot')
 
     #global tipoDeGrafico
     #tipoDeGrafico = 'graphml'
