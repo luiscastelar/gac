@@ -2,8 +2,8 @@
 from html.parser import HTMLParser
                             # parserHTML personalizable
 import re                   # Expresionse regulares
-import networkx as nx       # generador de grafos
-import graphviz             # para dibujar el grafo
+#import networkx as nx       # generador de grafos
+#import graphviz             # para dibujar el grafo
 import os
 
 # Constantes
@@ -87,6 +87,63 @@ class MyHTMLParser(HTMLParser):
             actual.setTxt(texto)        # asignamos texto
 
 
+class GeneradorGrafo():
+    keys = []
+    nodes = []
+    edges = []
+
+    def generate(self, node):
+        self.addNode(node)
+        txt = self.getHead()
+        txt += self.getKeys()
+        txt += self.getNodes()
+        txt += self.getEdges()
+        txt += self.getFooter()
+        return txt
+
+    def getHead(self):
+        return ''
+
+    def getFooter(self):
+        return ''
+
+    def addKey(key):
+        pass
+
+    def addNode(self, node):
+        pass
+
+    def addEdge(A, B):
+        pass
+
+    def getKeys(self):
+        return ''
+    
+    def getNodes(self):
+        return ''
+    
+    def getEdges(self):
+        return ''
+
+# Personalización a Grafo Dot
+class GeneradorGrafoDot(GeneradorGrafo):
+    def getHead(self):
+        return '''digraph G {
+    charset="UTF-8"
+'''
+    def getFooter(self):
+        return '}'
+
+    def addNode(self, node):
+        idNode = f'{node.nombre}_{node.uid}'
+        self.nodes.append(f'{idNode} [{getAtributos(node.atributos)}]\n')
+
+    def addEdge(self, A, B):
+        self.edges.append(f'{A}->{B}\n')
+
+    
+
+
 # función auxiliar para recorrer los atributos
 def list2str(lista: list[tuple[str, str|None]]):
         str = ""
@@ -154,16 +211,17 @@ def addNodo(grafo, nodo):
     
 
 def generarGraphml(DOM):
-    G = nx.Graph()                      # crear un grafo
-    G.__setattr__("charset", "UTF-8")
-    addNodo(G, DOM)                     # creamos recursivamente nodos a partir del nodo raíz
-    nx.write_graphml(G, "prueba.graphml")
+    #G = nx.Graph()                      # crear un grafo
+    #G.__setattr__("charset", "UTF-8")
+    #addNodo(G, DOM)                     # creamos recursivamente nodos a partir del nodo raíz
+    #nx.write_graphml(G, "prueba.graphml")
                                         # escribimos archivo de salida
-    nx.write_latex(G, "prueba.latex")                                
+    #nx.write_latex(G, "prueba.latex")                                
 
     #A = nx.nx_agraph.to_agraph(G)
     #A.layout('dot')
     #A.draw('salida.png') # guardar como png
+    pass
     
 
 def addNodoG(nodo):
@@ -308,6 +366,14 @@ def main():
     salida += cierre()
     print(f'Salida:\n{salida}')
     robust_write(salida, './salida.dot')
+
+
+    print('='*ANCHO)
+    G = GeneradorGrafoDot()
+    salida = G.generate(root)
+    print( salida )
+    
+
 
     #global tipoDeGrafico
     #tipoDeGrafico = 'graphml'
