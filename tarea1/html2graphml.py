@@ -1,6 +1,7 @@
 # Importaciones
 from html.parser import HTMLParser
                             # parserHTML personalizable
+from contentOfFile import File
 import re                   # Expresionse regulares
 #import networkx as nx       # generador de grafos
 #import graphviz             # para dibujar el grafo
@@ -325,42 +326,26 @@ def robust_write(text, filepath):
 
 # Main()
 def main():
-    global DOM
-
+    file = File()
+    html = file.load('./tarea1/prueba.html')
+    
+    bytesWritted = file.save('./tarea1/prueba.dot',html)
+    print(f'Se han escrito {bytesWritted} bytes.')
+    #print( html )
+    
     # Creamos el parserHTML
     parser = MyHTMLParser()
 
-    # Tomamos un html de ejemplo
-    html = '''
-    <html>
-        <head>
-            <title>Test</title>
-        </head>
-        <body>
-            <header>Cabecera</header>
-            <main>            
-                <h1 id="titulo">Parse me!</h1>
-                <div class="ppal">Texto principal
-                    <hr />
-                    <p>Otro <b style="color: gray;">párrafo</b></p>
-                </div>
-                <div><img src="fuente.jpg" /></div>
-                <div></div>
-            </main>
-        </body>
-    </html>
-    '''
-
-    #html = '''<div>hola mundo</div>'''
     parser.feed( html )         # cargamos html en nuestro parserHtml
     parser.close()              # cerramos parser
 
-    printElemento(root,0)       # Imprimimos 
-    print('-'*ANCHO)
+    printElemento(root,0)       # Imprimimos DOM
+    separador('-')
 
     generarGraphml(root)
+    quit(1);
     
-    print('='*ANCHO)
+    separador('=')
     salida = encabezado()
     salida += addNodoG(root)
     salida += cierre()
@@ -368,7 +353,7 @@ def main():
     robust_write(salida, './salida.dot')
 
 
-    print('='*ANCHO)
+    separador('=')
     G = GeneradorGrafoDot()
     salida = G.generate(root)
     print( salida )
@@ -378,6 +363,10 @@ def main():
     #global tipoDeGrafico
     #tipoDeGrafico = 'graphml'
     #generarGraph(root)
+
+def separador(char):
+    print(char * ANCHO)
+
 
 # Cargador externo
 if __name__ == "__main__":
