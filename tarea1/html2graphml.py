@@ -47,24 +47,28 @@ class Elemento:
     def setTxt(self, txt):
         self.txt = txt
 
+    def str(self):
+        padre = 'self' if self.padre == None else self.padre
+
+        return f'[nombre: {self.nombre}, padre: {padre}]'
+
 # Extensión de un parser sencillo
 class MyHTMLParser(HTMLParser):
+    root = None
+    actual = None
 
     # Cuando encuentra un tag de apertura
     def handle_starttag(self, tag, attrs):
-        global root
-        global actual
-
         # Creamos elemento
         ele = Elemento(tag)
-        if root == None:
+        if self.root == None:
             # Si no existía ningún elemento lo tomamos como raíz y actual (para asignar hijos)
-            root = ele
-            actual = ele
+            self.root = ele
+            self.actual = ele
         else:
-            ele.asignarPadre(actual)    # Le asignamos el padre para recorrer hacia afuera
-            actual.hijos.append(ele)    # Al actual le asignamos el elemento por estar anidado. Es un hijo 
-            actual = ele                # Recorreremos el elemento en busca de hijos
+            ele.asignarPadre(self.actual)    # Le asignamos el padre para recorrer hacia afuera
+            self.actual.hijos.append(ele)    # Al actual le asignamos el elemento por estar anidado. Es un hijo 
+            self.actual = ele                # Recorreremos el elemento en busca de hijos
 
         #print("Encountered a start tag:", tag)
         if len(attrs) > 0:
@@ -73,19 +77,20 @@ class MyHTMLParser(HTMLParser):
 
     # Cuando encuentra el cierre de etiqueta
     def handle_endtag(self, tag):
-        global actual
-        if actual != root:
+        if self.actual != root:
             # subimos al nivel superior
-            actual = actual.padre
+            self.actual = self.actual.padre
         #print("Encountered an end tag :", tag)
 
     def handle_data(self, data):
-        global actual
         # Si hay texto
         if len(data.strip()) > 0:
             #print("Encountered some data  :", data)
             texto = re.sub(r'\n|\s{2,}', r' ', data)  # eliminamos saltos de página '\n' y espacios dobles
-            actual.setTxt(texto)        # asignamos texto
+            self.actual.setTxt(texto)        # asignamos texto
+
+    def getRoot(self):
+        return self.root
 
 
 class GeneradorGrafo():
@@ -328,18 +333,24 @@ def robust_write(text, filepath):
 def main():
     file = File()
     html = file.load('./tarea1/prueba.html')
+
     
-    bytesWritted = file.save('./tarea1/prueba.dot',html)
-    print(f'Se han escrito {bytesWritted} bytes.')
+
     #print( html )
     
     # Creamos el parserHTML
     parser = MyHTMLParser()
 
     parser.feed( html )         # cargamos html en nuestro parserHtml
+    dom = parser.getRoot();
     parser.close()              # cerramos parser
 
-    printElemento(root,0)       # Imprimimos DOM
+    printElemento(dom,0)       # Imprimimos DOM
+
+    grafo = dom.str()
+    bytesWritted = file.save('./tarea1/prueba.dot',grafo)
+    print(f'Se han escrito {bytesWritted} bytes.')
+
     separador('-')
 
     generarGraphml(root)
