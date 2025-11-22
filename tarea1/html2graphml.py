@@ -19,36 +19,36 @@ ANCHO = 120                 # Ancho de pantalla
 # Variables globales
 #root = None
 #actual = None
-  
+
+
 
 # Main()
 def main():
     # Cargamos archivo
-    file = File()
-    html = file.load('./tarea1/prueba.html')
+    html = File().load('./tarea1/prueba.html')
 
-    # Utilizamos un parse para capturar elementos
-    parser = MyHTMLParser()
-    parser.feed( html )         # cargamos html en nuestro parserHtml
-    dom = parser.getRoot();
-    parser.close()              # cerramos parser
+    dom = captureElementsFromHtml(html)
 
-    tipoDeGrafico = menuSalida()
+    grafo = ''
+    #tipoDeGrafico = menuSalida()
+    tipoDeGrafico = 1
     match tipoDeGrafico:
         case 1: # dot
+            grafo = GeneradorGrafoDot()
+            print(f'Grafo:\n{grafo.generate(dom)}')
             pass
         case 2: # graphml
             pass
         case _: # cancelar (por defecto)
             print('¡Hasta otro día!')
     
+    quit(1)
 
-
-
+    ''' Obsoleto
     printElemento(dom,0)       # Imprimimos DOM
 
     grafo = dom.str()
-    bytesWritted = file.save('./tarea1/prueba.dot',grafo)
+    bytesWritted = File().save('./tarea1/prueba.dot',grafo)
     print(f'Se han escrito {bytesWritted} bytes.')
 
     separador('-')
@@ -68,12 +68,7 @@ def main():
     G = GeneradorGrafoDot()
     salida = G.generate(root)
     print( salida )
-    
-
-
-    #global tipoDeGrafico
-    #tipoDeGrafico = 'graphml'
-    #generarGraph(root)
+    '''
 
 
 def separador(char):
@@ -91,25 +86,17 @@ def menuSalida():
     return int( input('Introduce elección: '))
 
 
-# Para visualizar el DOM analizado
-def printElemento(ele,profundidad):
-    # Mostramos según tengamos atributos o no
-    if len(ele.atributos) > 0 :
-        print(' '*profundidad + f'{ele.nombre} [{list2str(ele.atributos)}]: {ele.txt}')
-    else:
-        print(' '*profundidad + f'{ele.nombre}: {ele.txt}')
-
-    # recorremos los hijos
-    for hijo in ele.hijos:
-        printElemento(hijo, profundidad+TAB)
 
 
-# función auxiliar para recorrer los atributos
-def list2str(lista: list[tuple[str, str|None]]):
-        str = ""
-        for ele in lista:
-            str += ele[0] + "->" + ele[1]
-        return str
+
+
+# Utilizamos un parse para capturar elementos
+def captureElementsFromHtml(html):
+    parser = MyHTMLParser()
+    parser.feed( html )         # cargamos html en nuestro parserHtml
+    dom = parser.getRoot();
+    parser.close()              # cerramos parser
+    return dom
 
 
 # Cargador externo
