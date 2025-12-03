@@ -2,3 +2,6 @@
 *.graphml
 *.latex
 *.dot
+
+tarea1/__pycache__/
+virtualEnv/

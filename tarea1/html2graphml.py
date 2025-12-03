@@ -18,7 +18,7 @@ ANCHO = 120                 # Ancho de pantalla
 # Main()
 def main():
     # Cargamos archivo
-    html = File().load('./tarea1/prueba.html')
+    html = File().load('./gac/tarea1/prueba.html')
 
     dom = parseFromHtml(html)
 
@@ -56,7 +56,7 @@ def menuSalida():
 
 
 # Utilizamos un parse para capturar elementos
-def parseFromHtml(html):
+def parseFromHtml(html: str):
     tokennizer = HtmlTokenizer()
     tokennizer.parse(html)
     for txt in tokennizer.tokens:
