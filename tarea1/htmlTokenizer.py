@@ -1,4 +1,6 @@
+import logging
 import re 
+
 
 SEPARADORES = (' ', '<', '>', '</', '/>')
 COMENTARIOS = ('<!--', '-->')
@@ -17,11 +19,10 @@ class HtmlTokenizer():
         html = self.borrarComentarios(html)
         pos = self.saltarDOCTYPE(html)
         
-        
         #pos = self.saltarComentarios(pos, html)  # no es necesario ya que ya lo borramos antes
         # Cargamos la etiqueta html
         pos = self.capturaTag(pos, html)
-        print(f'Análisis por carácter {pos}')
+        logging.debug(f'Análisis por carácter {pos}')
                 
         
     
@@ -42,9 +43,8 @@ class HtmlTokenizer():
             # Buscamos la posición después del cierre de la etiqueta !DOCTYPE
             pos = html[pos+tieneDOCTYPE+1:].index('>') + 2
         except:
-            print('El archivo no tiene !DOCTYPE\n---')
+            logging.debug('El archivo no tiene !DOCTYPE\n---')
         finally:
-            #print(html[pos:])
             return pos
 
     def saltarComentarios(self, pos: int, html: str) -> int:
@@ -60,9 +60,9 @@ class HtmlTokenizer():
             tempExt = temp[tieneComentarioEnPos:]
             posFin = tempExt.index(COMENTARIOS[1]) + len(COMENTARIOS[1])
             tempExt = tempExt[:posFin]
-            print('Comentario: ' + tempExt)
+            logging.debug('Comentario: ' + tempExt)
         except:
-            #print('El archivo no tiene mas comentrios\n---')
+            logging.debug('El archivo no tiene mas comentrios\n---')
             pass
         return pos+tieneComentarioEnPos+posFin
          
@@ -83,7 +83,7 @@ class HtmlTokenizer():
                 # Capturamos fin del comentario, lo mostramos y lo eliminamos 
                 # del texto final
                 posFin = html[tieneComentarioEnPos:].find(COMENTARIOS[1]) + len(COMENTARIOS[1])
-                print('Comentario eliminado: ' + 
+                logging.debug('Comentario eliminado: ' + 
                       html[tieneComentarioEnPos:tieneComentarioEnPos+posFin])
                 html = html[:tieneComentarioEnPos] + html[tieneComentarioEnPos+posFin:]
 
@@ -104,8 +104,10 @@ class HtmlTokenizer():
         tagCierreInicio = 0
         tagCierreFin = 0
         posicionInterior = 0
+
+        logging.debug(f'Vamos a procesar el trozo: ... {html[pos:pos+60].strip()} ...')
         try:
-            print(f'Vamos a procesar el trozo: ... {html[pos:pos+60].strip()} ...')
+            
             temp = html[pos:].strip()
             tagAperturaInicio = temp.index(SEPARADORES[1])
             tagAperturaFin = temp.index(SEPARADORES[2])
@@ -127,7 +129,7 @@ class HtmlTokenizer():
             match = re.search(pattern, tempTag)
             if match != None:
                 # Es un tag autocerrado -> no puede contener mas tags ni texto
-                print(f'Tag auto-cerrado: {nombreTag}')
+                logging.debug(f'Tag auto-cerrado: {nombreTag}')
                 #tagCierreFin = tagAperturaFin
                 return pos + tagAperturaFin + 2
         
@@ -141,13 +143,13 @@ class HtmlTokenizer():
             tempContenido = temp[contenidoInicio:contenidoFin].strip()
             tempCierre = temp[tagCierreInicio:tagCierreFin].strip()
 
-            print('---')
-            print('Tag apertura: ' + tagApertura)
-            print('\tNombre del tag:' + nombreTag)
-            print('\tContenido: ' + tempContenido)
+            logging.debug(f'''---
+                          Tag apertura: {tagApertura}
+                            Nombre del tag: {nombreTag}
+                            Contenido: {tempContenido)
             print('\tTag cierre: ' + tempCierre)
-            print('') 
-
+            
+            ''')
             longitudTotal = self.len(tempContenido)
             while posicionInterior < longitudTotal:               
                 posicionInterior = self.capturaTag(posicionInterior, tempContenido)

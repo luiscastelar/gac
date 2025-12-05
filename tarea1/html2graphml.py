@@ -1,15 +1,18 @@
 # Importaciones
+import logging
 from contentOfFile import File
 from elemento import Elemento
 from htmlTokenizer import HtmlTokenizer
 from htmlScanner import HtmlScanner
 
-#import re                   # Expresionse regulares
-#import os
+# Opciones de depuración:
+#  - DEBUG, INFO, WARNING, ERROR, CRITICAL
+logging.basicConfig(level=logging.CRITICAL)
 
 # Constantes
 TAB = 4                     # para la impresión del DOM
 ANCHO = 120                 # Ancho de pantalla
+
 
 # Variables globales
 
