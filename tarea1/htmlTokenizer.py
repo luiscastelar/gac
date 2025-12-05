@@ -9,24 +9,21 @@ class HtmlTokenizer():
     tokens = []
 
     def parse(self, html: str):
-        # Borramos comentarios (versión inicial)
+        # Preparamos el contenido:
+        #  - Eliminamos líneas ne blanco
+        #  - Borramos comentarios (versión inicial)
+        #  - Saltamos el Doctype, si existe
+        html = html.replace('\n','')
         html = self.borrarComentarios(html)
-        #print('HTML limpio:\n'+html)
-
-        # Recorremos toda la entrada
-        longitudTotal = self.len(html)
         pos = self.saltarDOCTYPE(html)
         
-        while pos < longitudTotal:
-            #pos = self.saltarComentarios(pos, html)  # no es necesario ya que ya lo borramos antes
-            pos = self.capturaTag(pos, html)
-            print(f'Análisis por carácter {pos}')
-            
-        print(html[pos:].strip())
-
         
-        quit(1)
-
+        #pos = self.saltarComentarios(pos, html)  # no es necesario ya que ya lo borramos antes
+        # Cargamos la etiqueta html
+        pos = self.capturaTag(pos, html)
+        print(f'Análisis por carácter {pos}')
+                
+        
     
     def len(self,html:str) -> int:
         # Evita errores de tipos
@@ -96,53 +93,68 @@ class HtmlTokenizer():
         # Retornamos html limpio
         return html
     
-    # Captura los tags
-    # Quizás en un futuro podríamos capturar los atributos de forma similar
+
     def capturaTag(self, pos: int, html: str) -> int:
+        # Captura los tags
+        # Quizás en un futuro podríamos capturar los atributos de forma similar
         tagAperturaInicio = 0
         tagAperturaFin = 0
         contenidoInicio = 0
         contenidoFin = 0
         tagCierreInicio = 0
         tagCierreFin = 0
+        posicionInterior = 0
         try:
-            print(f'{html[pos:pos+60]}...')
-            temp = html[pos:]
+            print(f'Vamos a procesar el trozo: ... {html[pos:pos+60].strip()} ...')
+            temp = html[pos:].strip()
             tagAperturaInicio = temp.index(SEPARADORES[1])
             tagAperturaFin = temp.index(SEPARADORES[2])
 
+            if tagAperturaInicio != 0:
+                return pos + self.capturaTag(0, temp[:tagAperturaInicio-1])
+
             # Capturamos el nombre del tag
-            match = re.search('\s|>', temp[tagAperturaInicio+1:])
+            match = re.search('\\s|>', temp[tagAperturaInicio+1:])
             finNombreTag = match.start()+1
             nombreTag = temp[tagAperturaInicio+1:tagAperturaInicio+finNombreTag]
 
+            # Capturamos los atributos del tag
+            # --- para un futuro ---
+
             # Es un tag autocerrado?
-            pattern = '<(.|\s)+?/>'
+            pattern = '<(.|\\s)+?/>'
             tempTag = temp[tagAperturaInicio:tagAperturaFin+1]
             match = re.search(pattern, tempTag)
-            #if match.start() > -1 :
             if match != None:
                 # Es un tag autocerrado -> no puede contener mas tags ni texto
                 print(f'Tag auto-cerrado: {nombreTag}')
-                tagCierreFin = tagAperturaFin
-            else:
-                # Buscamos el cierre
-                patron = f'</{nombreTag}>'
-                match = re.search(patron, temp[tagAperturaFin-1:])
-                tagCierreInicio,tagCierreFin = match.span()
-                contenidoInicio = tagAperturaFin + 1
-                #tagCierreInicio = temp.index(SEPARADORES[3])  # O el '/>'
-                contenidoFin = tagCierreInicio - 1            
-                #tagCierreFin = temp.index(SEPARADORES[2])  # O el '/>'
-                tagApertura = temp[tagAperturaInicio:tagAperturaFin+1].strip()
-                tempContenido = temp[contenidoInicio:contenidoFin+1].strip()
-                tempCierre = temp[tagCierreInicio:tagCierreFin+1].strip()
-                print('Tag apertura: ' + tagApertura)
-                print('Nombre del tag:' + nombreTag)
-                print('Contenido: ' + tempContenido)
-                print('Tag cierre: ' + tempCierre)
+                #tagCierreFin = tagAperturaFin
+                return pos + tagAperturaFin + 2
+        
+            # Buscamos el cierre
+            patron = f'</\\s*{nombreTag}\\s*>'
+            match = re.search(patron, temp[tagAperturaInicio:])
+            tagCierreInicio,tagCierreFin = match.span()
+            contenidoInicio = tagAperturaFin + 1
+            tagApertura = temp[tagAperturaInicio:tagAperturaFin+1].strip()
+            contenidoFin = tagCierreInicio
+            tempContenido = temp[contenidoInicio:contenidoFin].strip()
+            tempCierre = temp[tagCierreInicio:tagCierreFin].strip()
+
+            print('---')
+            print('Tag apertura: ' + tagApertura)
+            print('\tNombre del tag:' + nombreTag)
+            print('\tContenido: ' + tempContenido)
+            print('\tTag cierre: ' + tempCierre)
+            print('') 
+
+            longitudTotal = self.len(tempContenido)
+            while posicionInterior < longitudTotal:               
+                posicionInterior = self.capturaTag(posicionInterior, tempContenido)
         except:
-            #print('El archivo no tiene mas comentrios\n---')
+            print('---')
+            print(f'Sólo contenido: {html}')
+            print('') 
             return self.len(html)
             pass
         return pos+tagAperturaInicio+tagCierreFin+1
