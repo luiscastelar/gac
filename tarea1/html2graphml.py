@@ -5,14 +5,18 @@ from elemento import Elemento
 from htmlTokenizer import HtmlTokenizer
 from htmlScanner import HtmlScanner
 
-# Opciones de depuración:
-#  - DEBUG, INFO, WARNING, ERROR, CRITICAL
-logging.basicConfig(level=logging.CRITICAL)
+
+
 
 # Constantes
 TAB = 4                     # para la impresión del DOM
 ANCHO = 120                 # Ancho de pantalla
+LOGGIN = logging.DEBUG
 
+# Opciones de depuración:
+#  - DEBUG, INFO, WARNING, ERROR, CRITICAL
+logging.basicConfig(level=LOGGIN,
+                    format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s ''')
 
 # Variables globales
 

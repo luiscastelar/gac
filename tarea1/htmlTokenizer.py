@@ -146,17 +146,14 @@ class HtmlTokenizer():
             logging.debug(f'''---
                           Tag apertura: {tagApertura}
                             Nombre del tag: {nombreTag}
-                            Contenido: {tempContenido)
-            print('\tTag cierre: ' + tempCierre)
-            
+                            Contenido: {tempContenido}
+                            Tag cierre: {tempCierre}
             ''')
             longitudTotal = self.len(tempContenido)
             while posicionInterior < longitudTotal:               
                 posicionInterior = self.capturaTag(posicionInterior, tempContenido)
         except:
-            print('---')
-            print(f'Sólo contenido: {html}')
-            print('') 
+            logging.debug(f'Sólo contenido: {html}\n')
             return self.len(html)
             pass
         return pos+tagAperturaInicio+tagCierreFin+1
