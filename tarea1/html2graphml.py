@@ -25,19 +25,33 @@ ANCHO = 120                 # Ancho de pantalla
 # Main()
 def main():
     # Cargamos archivo
-    html = File().load('./tarea1/prueba.html')
+    html = File().load('./gac/tarea1/prueba.html')
 
+    # string to dom (elemento)
     dom = captureElementsFromHtml(html)
+    printElemento(dom,0)       # Imprimimos DOM
+    print('---\n')
 
+    # ---------------------------------------------------------------------
+    # Comenzamos la generación automática de código partiendo de plantillas
+    # ---------------------------------------------------------------------
     grafo = ''
     #tipoDeGrafico = menuSalida()
-    tipoDeGrafico = 1
+    tipoDeGrafico = 2
     match tipoDeGrafico:
         case 1: # dot
             grafo = GeneradorGrafoDot()
             print(f'Grafo:\n{grafo.generate(dom)}')
             pass
         case 2: # graphml
+            TEMPLATE = './templates/graphml.xml'
+            claves = getTipoDeAtributos(dom)
+            print(claves)
+            #nodos, aristas = getNodosYAristas(dom)
+            #salida = reemplazar(TEMPLATE, 'claves', claves)
+            #salida = reemplazar(salida, 'nodos', nodos)
+            #salida = reemplazar(salida, 'aristas', aristas)
+            
             pass
         case _: # cancelar (por defecto)
             print('¡Hasta otro día!')
@@ -70,6 +84,44 @@ def main():
     print( salida )
     '''
 
+def getTipoDeAtributos(ele: list[tuple[str, str|None]]):
+    atributos = set()
+    atributos.add('txt')
+    # Mostramos según tengamos atributos o no
+    try:
+        if len(ele.atributos) > 0 :            
+            for att in ele.atributos:
+                atributos.add(att[0])
+    except:
+        pass
+
+    # recorremos los hijos
+    for hijo in ele.hijos:
+        atributos = atributos | getTipoDeAtributos(hijo) 
+
+    return atributos
+
+# Para visualizar el DOM analizado
+def printElemento(ele,profundidad):
+    # Mostramos según tengamos atributos o no
+    try:
+        if len(ele.atributos) > 0 :
+            print(' '*profundidad + f'{ele.nombre} [{list2str(ele.atributos)}]: {ele.txt}')
+        else:
+            print(' '*profundidad + f'{ele.nombre}: {ele.txt}')
+    except:
+        pass
+
+    # recorremos los hijos
+    for hijo in ele.hijos:
+        printElemento(hijo, profundidad+TAB)
+
+# función auxiliar para recorrer los atributos
+def list2str(lista: list[tuple[str, str|None]]):
+    str = ""
+    for ele in lista:
+        str += ele[0] + "->" + ele[1]
+    return str
 
 def separador(char):
     print(char * ANCHO)
