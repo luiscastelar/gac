@@ -1,5 +1,4 @@
 # Importaciones
-#from html.parser import HTMLParser
 from myHTMLParser import MyHTMLParser
                             # parserHTML personalizable
 from contentOfFile import File
@@ -7,18 +6,11 @@ from elemento import Elemento
 #from generadorGrafo import GeneradorGrafo
 from generadorGrafoDot import GeneradorGrafoDot
 
-#import re                   # Expresionse regulares
-#import networkx as nx       # generador de grafos
-#import graphviz             # para dibujar el grafo
-#import os
-
 # Constantes
 TAB = 4                     # para la impresión del DOM
 ANCHO = 120                 # Ancho de pantalla
 
 # Variables globales
-#root = None
-#actual = None
 numNodo = 0
 numArista = 0
 
@@ -55,11 +47,10 @@ def main():
             #print(f'Claves: {clavesNominadas}')
             claves = ''
             for nombre, id in clavesNominadas.items():
-                claves += f'\t<key id="{id}" for="node" attr.name="{nombre}" attr.type="string" />\n'
-            print(f'Claves:\n {claves}')
+                claves += separador(' ')*2 + f'<key id="{id}" for="node" attr.name="{nombre}" attr.type="string" />' + '\n'
+            print(f'Claves:\n{claves}')
 
             listaDeNodos, listaDeAristas = getNodosYAristas(dom, clavesNominadas)
-            #print(f'Nodos: {nodos} y \nAristas: {aristas}')
             nodos = '\n'.join(listaDeNodos)
             print(f'Nodos:\n{nodos}')
             aristas = '\n'.join(listaDeAristas)
@@ -106,7 +97,7 @@ def main():
 def getTipoDeAtributos(ele: list[tuple[str, str|None]]):
     atributos = set()
     atributos.add('txt')
-    atributos.add('tag')
+    atributos.add('nombre')
     # Mostramos según tengamos atributos o no
     try:
         if len(ele.atributos) > 0 :            
@@ -131,28 +122,29 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     
     # Mostramos según tengamos atributos o no
     try:
-        datos += f'\t<data key="{ clavesNominadas["tag"] }">{ele.nombre}</data>\n'
+        datos += separador(' ')*3 + f'<data key="{ clavesNominadas["nombre"] }">{ele.nombre}</data>' + '\n'
         if len(ele.atributos) > 0 :            
             for att in ele.atributos:
-                #print(clavesNominadas[ att[0] ], att[1])
-                datos += f'\t<data key="{clavesNominadas[ att[0] ]}">{att[1]}</data>\n'
+                datos += separador(' ')*3 + f'<data key="{clavesNominadas[ att[0] ]}">{att[1]}</data>' + '\n'
         else:
             if len(ele.txt) > 0:
-                datos += f'\t<data key="{ clavesNominadas["txt"] }">{ele.txt}</data>\n'
+                datos += separador(' ')*3 + f'<data key="{ clavesNominadas["txt"] }">{ele.txt}</data>'+'\n'
     except:
         pass
 
     # Creamos el nodo
-    nodo = f'<node id="n{numNodo}">\n'
+    nodo = separador(' ')*2 + f'<node id="n{numNodo}">' + '\n'
+    nodo += datos
+    nodo += separador(' ')*2 + '</node>'
+    nodos.append( nodo )
+    
+    # Actualizamos índice
     numNodoPadre = numNodo
     numNodo += 1
-    nodo += datos
-    nodo += '</node>'
-    nodos.append( nodo )
-
+    
     # recorremos los hijos
     for hijo in ele.hijos:
-        aristas.append(f'<edge id="e{numArista}" source="n{numNodoPadre}" target="n{numNodo}"/>')
+        aristas.append( separador(' ')*2 + f'<edge id="e{numArista}" source="n{numNodoPadre}" target="n{numNodo}"/>')
         numArista += 1
         nodHijo, ariHijo =  getNodosYAristas(hijo, clavesNominadas)
         nodos.extend( nodHijo )
@@ -160,8 +152,9 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
 
     return nodos, aristas
 
-# Para visualizar el DOM analizado
+
 def printElemento(ele,profundidad):
+    # Para visualizar el DOM analizado
     # Mostramos según tengamos atributos o no
     try:
         if len(ele.atributos) > 0 :
@@ -175,18 +168,18 @@ def printElemento(ele,profundidad):
     for hijo in ele.hijos:
         printElemento(hijo, profundidad+TAB)
 
-# función auxiliar para recorrer los atributos
 def list2str(lista: list[tuple[str, str|None]]):
+    # función auxiliar para recorrer los atributos
     str = ""
     for ele in lista:
         str += ele[0] + "->" + ele[1]
     return str
 
-def separador(char):
-    print(char * ANCHO)
-
+def separador(char: str) -> str:
+    return char * TAB
 
 def menuSalida():
+    # Menú de selección de salida
     print(f'''
           Menú:
           -----          
@@ -196,13 +189,8 @@ def menuSalida():
           ''')
     return int( input('Introduce elección: '))
 
-
-
-
-
-
-# Utilizamos un parse para capturar elementos
 def captureElementsFromHtml(html):
+    # Utilizamos un parse para capturar elementos
     parser = MyHTMLParser()
     parser.feed( html )         # cargamos html en nuestro parserHtml
     dom = parser.getRoot();
