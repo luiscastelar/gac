@@ -1,6 +1,8 @@
 *.pdf
 *.latex
 *.dot
+*.log
+salida.graphml
 
 tarea1/__pycache__/
 virtualEnv/
