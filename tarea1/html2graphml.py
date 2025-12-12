@@ -1,4 +1,5 @@
 # Importaciones
+import logging
 from myHTMLParser import MyHTMLParser
                             # parserHTML personalizable
 from contentOfFile import File
@@ -9,13 +10,23 @@ from generadorGrafoDot import GeneradorGrafoDot
 # Constantes
 TAB = 4                     # para la impresión del DOM
 ANCHO = 120                 # Ancho de pantalla
+LOGGIN = logging.DEBUG
+TAREA_PATH = './gac/tarea1/'
+TEMPLATES_PATH = TAREA_PATH + 'templates/'
+FILE_LOGGIN = TAREA_PATH + 'app.log'
+
+# Opciones de depuración:
+#  - DEBUG, INFO, WARNING, ERROR, CRITICAL
+logging.basicConfig(filename = FILE_LOGGIN,
+                    filemode = 'a',
+                    level = LOGGIN,
+                    format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s ''')
 
 # Variables globales
 numNodo = 0
 numArista = 0
 
-TAREA_PATH = './gac/tarea1/'
-TEMPLATES_PATH = TAREA_PATH + 'templates/'
+# "Constantes" de tipo
 TEMPLATE_MAIN = ''
 TEMPLATE_KEYS = ''
 TEMPLATE_NODES = ''
@@ -29,11 +40,12 @@ def main():
 
     # Cargamos archivo
     html = File().load(TAREA_PATH + 'prueba.html')
+    #html = File().load('')
 
-    # string to dom (elemento)
+    # string Html to dom (elementos Html)
     dom = captureElementsFromHtml(html)
-    printElemento(dom,0)       # Imprimimos DOM
-    print('---\n')
+    logging.debug( html2str(dom, 0) )
+                                # 0 para NO dejar margen
 
     # ---------------------------------------------------------------------
     # Comenzamos la generación automática de código partiendo de plantillas
@@ -52,62 +64,37 @@ def main():
             TEMPLATE_NODES = 'node.graphml'
             TEMPLATE_DATAS = 'data.graphml'
             TEMPLATE_EDGES = 'edge.graphml'
+
             claves = getTipoDeAtributos(dom)
             clavesNominadas = {}
             numeral = 0
             for clave in claves:
                 clavesNominadas[clave] = f'd{numeral}'
                 numeral += 1
-            #print(f'Claves: {clavesNominadas}')
             claves = ''
             tipo = 'string'
             for nombre, id in clavesNominadas.items():
                 claves += File().load(TEMPLATES_PATH+TEMPLATE_KEYS).replace("<%id%>", id).replace("<%nombre%>", nombre).replace("<%tipo%>", tipo) + '\n'
-            print(f'Claves:\n{claves}')
+            logging.debug(f'Claves:\n{claves}')
 
             listaDeNodos, listaDeAristas = getNodosYAristas(dom, clavesNominadas)
-            nodos = '\n'.join(listaDeNodos)
-            print(f'Nodos:\n{nodos}')
+            nodos = ''.join(listaDeNodos)
+            logging.debug(f'Nodos:\n{nodos}')
             aristas = '\n'.join(listaDeAristas)
-            print(f'Aristas:\n{aristas}')
+            logging.debug(f'Aristas:\n{aristas}')
             
             salida = File().load(TEMPLATES_PATH + TEMPLATE_MAIN)
             salida = salida.replace("<%claves%>", claves)
             salida = salida.replace("<%nodos%>", nodos)
             salida = salida.replace("<%aristas%>", aristas)
-            print('---\n')
-            print( salida )
+            logging.debug( salida )
             File().save(TAREA_PATH + 'salida.graphml', salida)
         case _: # cancelar (por defecto)
             print('¡Hasta otro día!')
     
+    print('Hemos finalizado el procesado. Su archivo fue correctamente generado.')
     quit(1)
 
-    ''' Obsoleto
-    printElemento(dom,0)       # Imprimimos DOM
-
-    grafo = dom.str()
-    bytesWritted = File().save('./tarea1/prueba.dot',grafo)
-    print(f'Se han escrito {bytesWritted} bytes.')
-
-    separador('-')
-
-    #generarGraphml(dom)
-    quit(1);
-    
-    separador('=')
-    salida = encabezado()
-    salida += addNodoG(root)
-    salida += cierre()
-    print(f'Salida:\n{salida}')
-    robust_write(salida, './salida.dot')
-
-
-    separador('=')
-    G = GeneradorGrafoDot()
-    salida = G.generate(root)
-    print( salida )
-    '''
 
 def getTipoDeAtributos(ele: list[tuple[str, str|None]]):
     atributos = set()
@@ -138,7 +125,6 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     
     # Mostramos según tengamos atributos o no
     try:
-        #datos += separador(' ')*3 + f'<data key="{ clavesNominadas["nombre"] }">{ele.nombre}</data>' + '\n'
         plantilla = File().load(TEMPLATES_PATH+TEMPLATE_DATAS)
         temp = plantilla.replace("<%key_id%>", clavesNominadas["name"])  # o con key 'label'
         temp = temp.replace("<%value%>", ele.nombre)
@@ -146,7 +132,6 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
 
         if len(ele.atributos) > 0 :            
             for att in ele.atributos:
-                #datos += separador(' ')*3 + f'<data key="{clavesNominadas[ att[0] ]}">{att[1]}</data>' + '\n'        
                 temp = plantilla.replace("<%key_id%>", clavesNominadas[ att[0] ])
                 temp = temp.replace("<%value%>", att[1])
                 datos += temp + '\n'
@@ -154,7 +139,6 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
                 # Pensemos que, con carácter general, los estilos irán en una hoja CSS externa por separación de responsabilidades.
         else:
             if len(ele.txt) > 0:
-                #datos += separador(' ')*3 + f'<data key="{ clavesNominadas["txt"] }">{ele.txt}</data>'+'\n'
                 temp = plantilla.replace("<%key_id%>", clavesNominadas[ "txt" ])
                 temp = temp.replace("<%value%>", ele.txt)
                 datos += temp + '\n'
@@ -164,13 +148,9 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     # Creamos el nodo
     plantilla = File().load(TEMPLATES_PATH+TEMPLATE_NODES)
     temp = plantilla.replace("<%id%>", f'n{numNodo}')
-    temp = temp.replace("<%datos%>", datos)
-    temp += temp + '\n'
+    temp = temp.replace("<%datos%>", datos[:-1])
+    temp += '\n'
     nodos.append( temp )
-    #nodo = separador(' ')*2 + f'<node id="n{numNodo}">' + '\n'
-    #nodo += datos
-    #nodo += separador(' ')*2 + '</node>'
-    #nodos.append( nodo )
     
     # Actualizamos índice
     numNodoPadre = numNodo
@@ -187,20 +167,24 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     return nodos, aristas
 
 
-def printElemento(ele,profundidad):
-    # Para visualizar el DOM analizado
+def html2str(ele: Elemento, margen: int) -> str:
+    # Retorna el Elemento e hijos en forma de str
     # Mostramos según tengamos atributos o no
+    salida = ''
     try:
         if len(ele.atributos) > 0 :
-            print(' '*profundidad + f'{ele.nombre} [{list2str(ele.atributos)}]: {ele.txt}')
+            salida += ' '*margen + f'{ele.nombre} [{list2str(ele.atributos)}]: {ele.txt}\n'
         else:
-            print(' '*profundidad + f'{ele.nombre}: {ele.txt}')
+            salida += ' '*margen + f'{ele.nombre}: {ele.txt}\n'
     except:
         pass
 
     # recorremos los hijos
     for hijo in ele.hijos:
-        printElemento(hijo, profundidad+TAB)
+        salida += html2str(hijo, margen+TAB)
+
+    return salida
+
 
 def list2str(lista: list[tuple[str, str|None]]):
     # función auxiliar para recorrer los atributos
@@ -209,8 +193,10 @@ def list2str(lista: list[tuple[str, str|None]]):
         str += ele[0] + "->" + ele[1]
     return str
 
+
 def separador(char: str) -> str:
     return char * TAB
+
 
 def menuSalida():
     # Menú de selección de salida
@@ -222,6 +208,7 @@ def menuSalida():
           0 - Cancelar
           ''')
     return int( input('Introduce elección: '))
+
 
 def captureElementsFromHtml(html):
     # Utilizamos un parse para capturar elementos
