@@ -77,7 +77,7 @@ def main():
             salida = salida.replace("<%aristas%>", aristas)
             print('---\n')
             print( salida )
-            File().save('./gac/salida.graphml', salida)
+            File().save(TAREA_PATH + 'salida.graphml', salida)
         case _: # cancelar (por defecto)
             print('¡Hasta otro día!')
     
@@ -111,8 +111,9 @@ def main():
 
 def getTipoDeAtributos(ele: list[tuple[str, str|None]]):
     atributos = set()
+    atributos.add('label')
     atributos.add('txt')
-    atributos.add('nombre')
+    atributos.add('name')
     # Mostramos según tengamos atributos o no
     try:
         if len(ele.atributos) > 0 :            
@@ -139,7 +140,7 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     try:
         #datos += separador(' ')*3 + f'<data key="{ clavesNominadas["nombre"] }">{ele.nombre}</data>' + '\n'
         plantilla = File().load(TEMPLATES_PATH+TEMPLATE_DATAS)
-        temp = plantilla.replace("<%key_id%>", clavesNominadas["nombre"])
+        temp = plantilla.replace("<%key_id%>", clavesNominadas["name"])  # o con key 'label'
         temp = temp.replace("<%value%>", ele.nombre)
         datos += temp + '\n'
 

@@ -4,9 +4,9 @@
     xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
      http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
 
-    <graph id="G" edgedefault="undirected">
 <%claves%>
 
+    <graph id="G" edgedefault="undirected">
 <%nodos%>
     
 <%aristas%>
