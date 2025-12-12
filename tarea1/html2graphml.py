@@ -14,11 +14,21 @@ ANCHO = 120                 # Ancho de pantalla
 numNodo = 0
 numArista = 0
 
+TAREA_PATH = './gac/tarea1/'
+TEMPLATES_PATH = TAREA_PATH + 'templates/'
+TEMPLATE_MAIN = ''
+TEMPLATE_KEYS = ''
+TEMPLATE_NODES = ''
+TEMPLATES_DATAS = ''
+TEMPLATE_EDGES = ''
+
 
 # Main()
 def main():
+    global TEMPLATE_MAIN, TEMPLATE_KEYS, TEMPLATE_NODES, TEMPLATE_DATAS, TEMPLATE_EDGES
+
     # Cargamos archivo
-    html = File().load('./gac/tarea1/prueba.html')
+    html = File().load(TAREA_PATH + 'prueba.html')
 
     # string to dom (elemento)
     dom = captureElementsFromHtml(html)
@@ -37,7 +47,11 @@ def main():
             print(f'Grafo:\n{grafo.generate(dom)}')
             pass
         case 2: # graphml
-            TEMPLATE = './gac/tarea1/templates/graphml.xml'
+            TEMPLATE_MAIN = 'graphml.xml'
+            TEMPLATE_KEYS = 'key.graphml'
+            TEMPLATE_NODES = 'node.graphml'
+            TEMPLATE_DATAS = 'data.graphml'
+            TEMPLATE_EDGES = 'edge.graphml'
             claves = getTipoDeAtributos(dom)
             clavesNominadas = {}
             numeral = 0
@@ -46,8 +60,9 @@ def main():
                 numeral += 1
             #print(f'Claves: {clavesNominadas}')
             claves = ''
+            tipo = 'string'
             for nombre, id in clavesNominadas.items():
-                claves += separador(' ')*2 + f'<key id="{id}" for="node" attr.name="{nombre}" attr.type="string" />' + '\n'
+                claves += File().load(TEMPLATES_PATH+TEMPLATE_KEYS).replace("<%id%>", id).replace("<%nombre%>", nombre).replace("<%tipo%>", tipo) + '\n'
             print(f'Claves:\n{claves}')
 
             listaDeNodos, listaDeAristas = getNodosYAristas(dom, clavesNominadas)
@@ -56,7 +71,7 @@ def main():
             aristas = '\n'.join(listaDeAristas)
             print(f'Aristas:\n{aristas}')
             
-            salida = File().load(TEMPLATE)
+            salida = File().load(TEMPLATES_PATH + TEMPLATE_MAIN)
             salida = salida.replace("<%claves%>", claves)
             salida = salida.replace("<%nodos%>", nodos)
             salida = salida.replace("<%aristas%>", aristas)
@@ -122,21 +137,39 @@ def getNodosYAristas(ele: list[tuple[str, str|None]], clavesNominadas: list):
     
     # Mostramos según tengamos atributos o no
     try:
-        datos += separador(' ')*3 + f'<data key="{ clavesNominadas["nombre"] }">{ele.nombre}</data>' + '\n'
+        #datos += separador(' ')*3 + f'<data key="{ clavesNominadas["nombre"] }">{ele.nombre}</data>' + '\n'
+        plantilla = File().load(TEMPLATES_PATH+TEMPLATE_DATAS)
+        temp = plantilla.replace("<%key_id%>", clavesNominadas["nombre"])
+        temp = temp.replace("<%value%>", ele.nombre)
+        datos += temp + '\n'
+
         if len(ele.atributos) > 0 :            
             for att in ele.atributos:
-                datos += separador(' ')*3 + f'<data key="{clavesNominadas[ att[0] ]}">{att[1]}</data>' + '\n'
+                #datos += separador(' ')*3 + f'<data key="{clavesNominadas[ att[0] ]}">{att[1]}</data>' + '\n'        
+                temp = plantilla.replace("<%key_id%>", clavesNominadas[ att[0] ])
+                temp = temp.replace("<%value%>", att[1])
+                datos += temp + '\n'
+                # Aquí deberíamos pensar si queremos sacar los atributos de "style" como keys o dejarlos como un bloque.
+                # Pensemos que, con carácter general, los estilos irán en una hoja CSS externa por separación de responsabilidades.
         else:
             if len(ele.txt) > 0:
-                datos += separador(' ')*3 + f'<data key="{ clavesNominadas["txt"] }">{ele.txt}</data>'+'\n'
+                #datos += separador(' ')*3 + f'<data key="{ clavesNominadas["txt"] }">{ele.txt}</data>'+'\n'
+                temp = plantilla.replace("<%key_id%>", clavesNominadas[ "txt" ])
+                temp = temp.replace("<%value%>", ele.txt)
+                datos += temp + '\n'
     except:
         pass
 
     # Creamos el nodo
-    nodo = separador(' ')*2 + f'<node id="n{numNodo}">' + '\n'
-    nodo += datos
-    nodo += separador(' ')*2 + '</node>'
-    nodos.append( nodo )
+    plantilla = File().load(TEMPLATES_PATH+TEMPLATE_NODES)
+    temp = plantilla.replace("<%id%>", f'n{numNodo}')
+    temp = temp.replace("<%datos%>", datos)
+    temp += temp + '\n'
+    nodos.append( temp )
+    #nodo = separador(' ')*2 + f'<node id="n{numNodo}">' + '\n'
+    #nodo += datos
+    #nodo += separador(' ')*2 + '</node>'
+    #nodos.append( nodo )
     
     # Actualizamos índice
     numNodoPadre = numNodo

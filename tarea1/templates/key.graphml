@@ -1,0 +1,1 @@
+        <key id="<%id%>" for="node" attr.name="<%nombre%>" attr.type="<%tipo%>" />
