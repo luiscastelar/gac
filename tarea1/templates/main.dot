@@ -1,0 +1,5 @@
+// The graph name and the semicolons are optional
+digraph G {
+    <%nodos%>
+    <%aristas%>
+}
