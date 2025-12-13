@@ -1,5 +1,3 @@
-
-
 # Clase Elemento HTML
 class Elemento:
     uid = 0;
@@ -8,7 +6,7 @@ class Elemento:
         Elemento.uid = Elemento.uid + 1 # para evitar colisiones en los grafos
         self.nombre = nombre
         self.txt = ''       # texto plano
-        self.atributos = []
+        self.atributos = [] # los atributos del elemento
         self.hijos = []     # Elementos hijos anidados
         self.padre = None   # Elemento padre del que cuelga
 
@@ -24,7 +22,9 @@ class Elemento:
     def setTxt(self, txt):
         self.txt = txt
 
-    def str(self):
-        padre = 'self' if self.padre == None else self.padre
-
-        return f'[nombre: {self.nombre}, padre: {padre}]'
+    # Añado más texto
+    def addTxt(self, txt):
+        if len( self.txt ) == 0:
+            self.txt = txt
+        else:
+            self.txt += '|' + txt
