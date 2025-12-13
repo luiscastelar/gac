@@ -2,13 +2,18 @@ from html.parser import HTMLParser
 from elemento import Elemento
 import re
 
-# Extensión de un parser sencillo
+
 class MyHTMLParser(HTMLParser):
+    # Extensión de un parser sencillo
+    # En él capturamos recursivamente los elementos Html
+
+    # variables globales
     root = None
     actual = None
 
-    # Cuando encuentra un tag de apertura
+
     def handle_starttag(self, tag, attrs):
+        # Cuando encuentra un tag de apertura
         # Creamos elemento
         ele = Elemento(tag)
         if self.root == None:
@@ -16,28 +21,32 @@ class MyHTMLParser(HTMLParser):
             self.root = ele
             self.actual = ele
         else:
-            ele.asignarPadre(self.actual)    # Le asignamos el padre para recorrer hacia afuera
-            self.actual.hijos.append(ele)    # Al actual le asignamos el elemento por estar anidado. Es un hijo 
-            self.actual = ele                # Recorreremos el elemento en busca de hijos
+            ele.asignarPadre(self.actual)   # Le asignamos el padre para recorrer hacia arriba
+            self.actual.hijos.append(ele)   # Al actual (el padre) le asignamos 
+                                            # el elemento por estar anidado (es 
+                                            # un hijo)
+            self.actual = ele               # Actualizamos el puntero
 
-        #print("Encountered a start tag:", tag)
         if len(attrs) > 0:
-            #print("Atributos: " + list2str(attrs))
-            ele.atributos = attrs        # guardamos la lista de atributos
+            # El elemento tiene atributos con lo que los guardamos
+            ele.atributos = attrs
 
-    # Cuando encuentra el cierre de etiqueta
+    
     def handle_endtag(self, tag):
+        # Cuando encuentra el cierre de etiqueta
         if self.actual != MyHTMLParser.root:
-            # subimos al nivel superior
+            # Si el actual no es el root debemos subir al padre del actual
             self.actual = self.actual.padre
-        #print("Encountered an end tag :", tag)
+
 
     def handle_data(self, data):
-        # Si hay texto
+        # Tomamos el contenido (txt) del tag
         if len(data.strip()) > 0:
-            #print("Encountered some data  :", data)
-            texto = re.sub(r'\n|\s{2,}', r' ', data)  # eliminamos saltos de página '\n' y espacios dobles
-            self.actual.setTxt(texto)        # asignamos texto
+            texto = re.sub(r'\n|\s{2,}', r' ', data)
+                                            # eliminamos saltos de página '\n' 
+                                            # y espacios dobles
+            self.actual.addTxt(texto)       # guardamos texto
+
 
     def getRoot(self):
         return self.root
