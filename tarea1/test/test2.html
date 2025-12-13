@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>Archivo de Prueba 2: Contenido Incrustado</title>
+    </head>
+    <body>
+        <h2>Visualización de Contenido</h2>
+
+        <section>
+            <p>Este párrafo contiene una imagen referenciada:</p>
+            <figure>
+                <img src="logo.jpg" alt="Logo de la empresa" width="100">
+                <figcaption>Logotipo</figcaption>
+            </figure>
+        </section>
+
+        <div id="incrustados">
+            <p>Aquí se incrusta un documento externo:</p>
+            
+            <!-- Elemento de contenido incrustado: iframe -->
+            <iframe src="/documento.pdf" width="600" height="400" title="Documento PDF">
+                <p>Tu navegador no soporta iframes.</p>
+            </iframe>
+
+            <!-- Otro elemento de contenido incrustado: embed -->
+            <embed type="video/mp4" src="video.mp4" width="400" height="300">
+            
+        </div>
+    </body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>Archivo de prueba 3: Tablas y Formularios</title>
+    </head>
+    <body>
+        <h1>Registro de Empleado</h1>
+
+        <form action="/submit" method="post">
+            <fieldset>
+                <legend>Datos Personales</legend>
+                <table>
+                    <caption>Información de Contacto</caption>
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><label for="nombre">Nombre:</label></td>
+                            <td><input type="text" id="nombre" name="nombre" required></td>
+                        </tr>
+                        <tr>
+                            <td>Departamento:</td>
+                            <td>
+                                <select name="depto">
+                                    <option value="ventas">Ventas</option>
+                                    <option value="it">IT</option>
+                                    <option value="hr">RRHH</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2"><button type="submit">Guardar Registro</button></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </fieldset>
+        </form>
+    </body>
+</html>
