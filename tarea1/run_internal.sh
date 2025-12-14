@@ -14,3 +14,4 @@ fi
 
 # Ejecutar la aplicación
 python3 html2graphml.py
+exit 0

@@ -36,3 +36,4 @@ fi
 echo "================================"
 echo "Instalacion completada"
 echo "================================"
+sleep 5
