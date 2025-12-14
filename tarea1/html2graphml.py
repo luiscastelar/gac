@@ -2,6 +2,7 @@
 # Importaciones
 # ---------------------------------------------------------------------
 import logging
+import os
 from myHTMLParser import MyHTMLParser
                             # parserHTML personalizable
 from contentOfFile import File
@@ -13,8 +14,10 @@ from drawGraphml import Graphml
 # ---------------------------------------------------------------------
 TAB = 4                     # parametrizamos el ancho de tabulaciones
 ANCHO = 120                 # y de la pantalla
-LOGGIN = logging.INFO      # modo de depuración
-TAREA_PATH = './gac/tarea1/'
+LOGGIN = logging.INFO       # modo de depuración
+TAREA_PATH = os.path.dirname(__file__) + '/'
+                            # capturamos la ruta actual para ser base de 
+                            # templates y test
 TEMPLATES_PATH = TAREA_PATH + 'templates/'
 FILE_LOGGIN = TAREA_PATH + 'app.log'
 
@@ -133,8 +136,15 @@ def main():
     if tipoDeGrafico == 2:
         visualizar = input('¿Desea visualizar el resultado? [s/N]: ')
         if visualizar.lower() == 's' and tipoDeGrafico == 2:
-            Graphml.draw(TAREA_PATH + 'grafos/' + 'salida.'+GRAPH_TYPE)
-
+            try:
+                Graphml.draw(TAREA_PATH + 'grafos/' + 'salida.'+GRAPH_TYPE)
+            except:
+                logging.info('''La generación del grafo ha fallado.
+                             Probablemente NO tengas instalado en el sistema la librería NetworkX.
+                             Para proceder a instalarla abre una terminal (bash/cmd/powershell) y escribe:
+                             pip install networkx
+                             En caso de fallo o incompatibilidad con tu S.O. puedes cargar un entorno virtual y realizar la instalación anterior.
+                             Para ello sigue lo indicado en https://medium.com/@diego.coder/generaci%C3%B3n-de-entornos-virtuales-con-venv-en-python-3-bd374a173129''')
     quit(0)
 
 
