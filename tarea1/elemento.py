@@ -1,5 +1,9 @@
-# Clase Elemento HTML
+
 class Elemento:
+    r"""Clase Elemento HTML.
+    Con relación con elementos hijos y padre.
+    Almacena los atributos y el contenido plano (txt)"""
+
     uid = 0;
 
     def __init__(self, nombre):
