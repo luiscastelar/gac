@@ -13,6 +13,9 @@ class Elemento:
         self.atributos = [] # los atributos del elemento
         self.hijos = []     # Elementos hijos anidados
         self.padre = None   # Elemento padre del que cuelga
+        self.dibujable = True
+                            # Valor por defecto modificable con parametrizacion
+                            # (parte 2 del ejercicio)
 
     # Asigno padre (para vincularlo y poderlo recorrer)
     def asignarPadre(self, ele):

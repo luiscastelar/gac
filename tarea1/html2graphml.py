@@ -47,11 +47,12 @@ TEMPLATE_NODES = ''
 TEMPLATES_DATAS = ''
 TEMPLATE_EDGES = ''
 
+
 # ---------------------------------------------------------------------
 # Main()
 # ---------------------------------------------------------------------
 def main():
-    global TEMPLATE_MAIN, TEMPLATE_KEYS, TEMPLATE_NODES, TEMPLATE_DATAS, TEMPLATE_EDGES
+    global TEMPLATE_MAIN, TEMPLATE_KEYS, TEMPLATE_NODES, TEMPLATE_DATAS, TEMPLATE_EDGES, tagsParametrizados
 
     # Cargamos archivo
     #html = File().load(TAREA_PATH + 'test/test1.html')
@@ -394,6 +395,7 @@ def captureElementsFromHtml(html):
     except:
         print('Fallo de parseo de html')
         quit(1)
+
 
 
 # Autocargador de programa externo

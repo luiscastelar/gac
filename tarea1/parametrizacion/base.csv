@@ -1,0 +1,7 @@
+tags,export,shape,color
+html,yes,oval,black
+link|meta|style|title,no,,
+head|body,yes,hexagon,darkgray
+address|article|aside|footer|header,yes,oval,gray
+h1|h2|h3|h4|h5|h6|main|nav|section,yes,doublecircle,blue
+embed|object|param|iframe|picture|source,no,,
