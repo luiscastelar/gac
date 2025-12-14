@@ -4,16 +4,19 @@ import re
 
 
 class MyHTMLParser(HTMLParser):
-    # Extensión de un parser sencillo
-    # En él capturamos recursivamente los elementos Html
+    r""" Extensión de un parser sencillo.
+    En él capturamos recursivamente los elementos Html y generamos un objeto Elemento.
+    
+    Importación: HTMLParser, Elemento y el módulo re"""
 
-    # variables globales
+    # Variables globales
     root = None
     actual = None
 
 
     def handle_starttag(self, tag, attrs):
-        # Cuando encuentra un tag de apertura
+        r"""Cuando encuentra un tag de apertura creamos el objeto Elemento, asociamos con su padre (o lo declaramos como root del dom) y le cargamos los atributos y una lista de elementos hijo."""
+
         # Creamos elemento
         ele = Elemento(tag)
         if self.root == None:
@@ -33,14 +36,15 @@ class MyHTMLParser(HTMLParser):
 
     
     def handle_endtag(self, tag):
-        # Cuando encuentra el cierre de etiqueta
+        r"""Cuando encuentra el cierre de etiqueta continuamos recorriendo los elementos del padre."""
+
         if self.actual != MyHTMLParser.root:
             # Si el actual no es el root debemos subir al padre del actual
             self.actual = self.actual.padre
 
 
     def handle_data(self, data):
-        # Tomamos el contenido (txt) del tag
+        r"Tomamos el contenido (txt) del tag y lo cargadmos en el Elemento."
         if len(data.strip()) > 0:
             texto = re.sub(r'\n|\s{2,}', r' ', data)
                                             # eliminamos saltos de página '\n' 
@@ -49,6 +53,7 @@ class MyHTMLParser(HTMLParser):
 
 
     def getRoot(self):
+        r"Devuelve el padre del elemento actual."
         return self.root
 
 
