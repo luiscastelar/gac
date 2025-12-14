@@ -1,4 +1,5 @@
 import os
+import re
 
 __all__ = ['File']
 
@@ -9,8 +10,8 @@ class File():
         # Retorna todo el contenido del archivo o da error y finaliza programa
 
         if len(filepath)==0:
-            # Si no se le pasa nombre lo pide
-            filepath = input('Introduce el nombre del archivo (ruta completa): ')
+            filepath = self.getRuta()
+            
 
         try: 
             with open(filepath, 'r', encoding='utf-8') as f:
@@ -25,7 +26,7 @@ class File():
         # Sobreescribe el contenido anterior
 
         if len(filepath)==0:
-            filepath = input('Introduce el nombre del archivo (ruta completa): ')
+            filepath = self.getRuta()
 
         # Crea el directorio si no existe
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -35,4 +36,24 @@ class File():
         except IOError as e:
             print(f'Write failed: {e}')
             quit(2)
+
+
+    def getRuta(self) -> str:
+        filepath = input('Introduce el nombre del archivo (ruta completa o relativa a la aplicación): ')
+        if not self.esRutaAbsoluta(filepath):
+            # Si la ruta es relativa corregimos
+            filepath = os.path.dirname(__file__) + '/' + filepath
+        return filepath
+
+
+    def esRutaAbsoluta(self, ruta: str) -> bool:
+        if ruta[0] == '/':
+            # Ruta absoluta en Unix
+            return True
+        match = re.search('^\w:', ruta)
+        if match != None:
+            # Ruta absoluta en Windows
+            return True
         
+        # Ruta relativa
+        return False
