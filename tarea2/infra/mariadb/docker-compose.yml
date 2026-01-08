@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------
+#     Receta para levantar:
+#  + un servidor MariaDB
+#  + un servidor PostgreSQL
+#  + un cliente ligero Adminer (postgreSQL y MariaDB)
+#  - (PDTE) un cliente pesado PHPMyAdmin (sólo MariaDB)
+#
+# Recuerda:
+#  + Para levantar los contenedores: `docker-compose up -d`
+#  + Para destruir los contenedores: `docker-compose down`
+#  + Para verificar si funcionan: `docker-compose ps`
+#  + Para ver los logs del sistema: `docker-compose logs`
+# ---------------------------------------------------------------
+services:
+  mariaDB:
+#    env_file: ./env.pass
+    container_name: mariaDB
+    image: mariadb:10.11
+    # Mantener versiones LTS 10.11 hasta 2028
+    # https://mariadb.org/about/#maintenance-policy
+
+    restart: always
+
+    environment:
+      TZ: 'Europe/Madrid'
+      MARIADB_ROOT_PASSWORD: ${passRoot}
+      MARIADB_DATABASE: ${db}
+      MARIADB_USER: ${user}
+      MARIADB_PASSWORD: ${pass}
+# Deberéis crear un archivo denominado .env con las credenciales
+#   passRoot=password_de_root
+#   db=nombre_de_DB
+#   user=nombre_usuario
+#   pass=pass_de_usuario
+
+    volumes:
+      - ./MySQL:/var/lib/mysql
+# Importar detos con:
+#  env $(cat .env | xargs)  bash -c ' docker exec -i mariaDB mysql -u"$user" -p"$pass" "$db" < ../ejemplos/alumnos.sql '
+
+    ports:
+      - 3306:3306
+# Si tenéis conflictos con XAMPP o lo que sea sólo tenéis que cambiar 
+# el número de la izquierda de los dos puntos. Por ejemplo: 
+#    - 13306:3306
+# Luego accederéis por ese puerto desde vuestro cliente de BBDD
+    networks:
+      - postgre
+
+
+networks:
+   postgre:
+      driver: bridge
