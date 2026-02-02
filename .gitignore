@@ -7,4 +7,6 @@ salida.dot
 
 **/__pycache__/
 */gac/tarea2/gac2/
+**/tarea2/gac2/*
+tarea2/infra
 virtualEnv/
