@@ -5,5 +5,6 @@
 salida.graphml
 salida.dot
 
-tarea1/__pycache__/
+**/__pycache__/
+*/gac/tarea2/gac2/
 virtualEnv/

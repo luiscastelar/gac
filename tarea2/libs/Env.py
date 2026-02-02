@@ -12,12 +12,12 @@ class Env():
 
         archivoEnv = File().load(ruta)
 
-        variablesDeEntorno = []
+        variablesDeEntorno = {}
         for linea in archivoEnv.split('\n'):
             pares = linea.split('=')
             if len(pares) >= 2:
                 key = pares[0]
                 value = pares[1]
             #print(f'L: {key} -> {value}')
-            variablesDeEntorno.append( {key, value})
+            variablesDeEntorno[key] = value
         return variablesDeEntorno

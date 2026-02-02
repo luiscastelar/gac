@@ -32,6 +32,15 @@ CREATE TABLE `alumnos` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `calificaciones`;
+CREATE TABLE `calificaciones` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `alumnoId` int(11) NOT NULL,
+  `valor` decimal(4,2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (alumnoId) REFERENCES alumnos(id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `alumnos`
 --
@@ -39,9 +48,16 @@ CREATE TABLE `alumnos` (
 LOCK TABLES `alumnos` WRITE;
 /*!40000 ALTER TABLE `alumnos` DISABLE KEYS */;
 INSERT INTO `alumnos` VALUES
-(1,'Luis','Ferreira',46);
+(1,'Luis','Ferreira',46),
+(2, 'Juan', 'Palomo', 16);
 /*!40000 ALTER TABLE `alumnos` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+INSERT INTO `calificaciones` VALUES
+(1, 1, 5.45),
+(2, 2, 7.0);
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
