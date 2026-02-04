@@ -1,4 +1,4 @@
-from contentOfFile import File
+from libs.contentOfFile import File
 import os
 
 __all__ = ['Env']
