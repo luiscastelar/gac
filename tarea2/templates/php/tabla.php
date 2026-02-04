@@ -90,94 +90,136 @@ $filas = $pdo->query(
 <head>
 <meta charset="UTF-8">
 <title>CRUD %%TABLA_NOMBRE%%</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    body{
-        background-color:#f5f6f8;
-    }
-
-    .crud-section{
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 25px;
-        box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    }
-
-    .crud-title{
-        margin-bottom: 15px;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 6px;
-    }
-
-</style>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/default.css">
+<script src="js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 <div class="container-md py-4">
+<!--
+Source - https://stackoverflow.com/a/57361587
+Posted by Alessio Cantarella, modified by community. See post 'Timeline' for change history
+Retrieved 2026-02-04, License - CC BY-SA 4.0
+-->
+
+<div class="btn btn-success"><a href="index.php">Volver</a></div>
+
 <h1>CRUD tabla %%TABLA_NOMBRE%%</h1>
+<div class="accordion" id="crudAccordion">
+    <!-- ===================================================== -->
+    <!-- CREATE -->
+    <!-- ===================================================== -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCreate">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCreate">
+            CRUD tabla %%TABLA_NOMBRE%%
+            </button>
+        </h2>
 
-<!-- ===================================================== -->
-<!-- CREATE -->
-<!-- ===================================================== -->
+        <div id="collapseCreate"
+            class="accordion-collapse collapse"
+            data-bs-parent="#crudAccordion">
 
-<section class="crud-section">
-<h2 class="crud-title">CREATE – Alta de %%TABLA_NOMBRE%%</h2>
+            <div class="accordion-body">
 
-<form method="post">
-%%FORM_CREATE_CAMPOS%%
-    <button type="submit" name="create" class="btn btn-success">Crear</button>
-</form>
-</section>
+             <form method="post">
+                %%FORM_CREATE_CAMPOS%%
+                <button type="submit" name="create" class="btn btn-success">Crear</button>
+            </form>
 
+            </div>
+        </div>
+    </div>
 
-<!-- ===================================================== -->
-<!-- READ -->
-<!-- ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- READ -->
+    <!-- ===================================================== -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingRead">
+            <button class="accordion-button" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseRead">
+            READ – Listado de %%TABLA_NOMBRE%%
+            </button>
+        </h2>
 
-<section>
-<h2>READ – Listado de %%TABLA_NOMBRE%%</h2>
+        <div id="collapseRead"
+            class="accordion-collapse collapse show"
+            data-bs-parent="#crudAccordion">
 
-<table border="1">
-<tr>
-%%READ_COLUMNS%%</tr>
+            <div class="accordion-body">
 
-<?php foreach ($filas as $fila): ?>
-<tr>
-%%READ_DATOS%%</tr>
-<?php endforeach; ?>
+            <table class="table table-striped table-bordered table-hover">
+                <tr>
+                %%READ_COLUMNS%%</tr>
 
-</table>
-</section>
+                <?php foreach ($filas as $fila): ?>
+                <tr>
+                %%READ_DATOS%%</tr>
+                <?php endforeach; ?>
+            </table>
 
+            </div>
+        </div>
+    </div>
 
-<!-- ===================================================== -->
-<!-- UPDATE -->
-<!-- ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- UPDATE -->
+    <!-- ===================================================== -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingUpdate">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseUpdate">
+            UPDATE – Modificar %%TABLA_NOMBRE%%
+            </button>
+        </h2>
 
-<section>
-<h2>UPDATE – Modificar %%TABLA_NOMBRE%%</h2>
+        <div id="collapseUpdate"
+            class="accordion-collapse collapse"
+            data-bs-parent="#crudAccordion">
 
-<form method="post">
-%%FORM_CREATE_CAMPOS%%
-    <button type="submit" name="update">Actualizar</button>
-</form>
-</section>
+            <div class="accordion-body">
 
+             <form method="post">
+            %%FORM_CREATE_CAMPOS%%
+                <button type="submit" name="update" class="btn btn-success">Actualizar</button>
+            </form>
 
-<!-- ===================================================== -->
-<!-- DELETE -->
-<!-- ===================================================== -->
+            </div>
+        </div>
+    </div>
 
-<section>
-<h2>DELETE – Borrar %%TABLA_NOMBRE%%</h2>
+    <!-- ===================================================== -->
+    <!-- DELETE -->
+    <!-- ===================================================== -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDelete">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseDelete">
+            DELETE – Borrar %%TABLA_NOMBRE%%
+            </button>
+        </h2>
 
-<form method="post">
-    ID del alumno:
-    <input type="number" name="id" required>
+        <div id="collapseDelete"
+            class="accordion-collapse collapse"
+            data-bs-parent="#crudAccordion">
 
-    <button type="submit" name="delete">Eliminar</button>
-</form>
-</section>
+            <div class="accordion-body">
+
+            <form method="post">
+                <label class="form-label">ID del alumno:</label>
+                <input type="number" name="id" class="form-control" required>
+
+                <button type="submit" name="delete" class="btn btn-danger">Eliminar</button>
+            </form>
+
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

@@ -242,6 +242,9 @@ USER={variablesDeEntorno["user"]}
 PASS={variablesDeEntorno["pass"]}
 '''
         File().save(plantillaOut + '.env', varEnv)
+        import shutil
+        shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
+        shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
     pass
 
 

@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Índice</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/default.css">
 </head>
-<body>
-    <H1>Tablas</H1>
-    <ul>
-%%BOTONES%%    </ul>
+<body class="bg-light">
+    <div class="min-vh-100 d-flex align-items-center">
+        <div class="container-md py-4">
+            <h1 class="mb4">Tablas disponibles en la base de datos</H1>
+            <div class="list-group">
+%%BOTONES%%
+            </div>
+        </div>
+    </div>
 </body>
 </html>
