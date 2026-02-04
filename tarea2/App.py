@@ -113,6 +113,7 @@ def main():
             tabla.columnas.append( columna )    # añadimos columna a columnas[]
         tablas.append( tabla )                  # añadimos tabla a tablas[]
     metadatos.tablas = tablas                   # añadimos tablas a db
+    logging.debug('Metadatos capturados:\n' + metadatos.str())
     #print(metadatos.str())
 
     # TODO: Normalización de metadatos?
@@ -155,12 +156,67 @@ def main():
     for tabla in metadatos.tablas:
         contenidoTabla = plantillaTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
         # Columnas
-        columnasDef = ''
+        nombresDeCampos = ''
+        bindCampos = ''
+        postCampos = ''
+        formCreateCampos = ''
+        readColumns = ''
+        readDatos = ''
+        columnaPK = None
+        updateBindCampos = ''
+        updatePostCampos = ''
+
         for columna in tabla.columnas:
-            columnasDef += f'// {columna.COLUMN_NAME} : {columna.DATA_TYPE}\n'
+            nombre = columna.COLUMN_NAME
+            # Form
+            dataType = driverDB.convertDataType(columna.DATA_TYPE)
+            required = 'required' if columna.IS_NULLABLE.upper() == 'NO' else ''
+            
+            # Create
+            nombresDeCampos += nombre + ', '
+            bindCampos += '?, '
+            postCampos += f'\t$_POST["{nombre}"],\n'
+            formCreateCampos += f'\t{nombre.upper()}:\n<input type="{dataType}" name="{nombre}" {required} /><br />\n'
+            
+            # Read
+            readColumns += f'\t<th>{nombre.capitalize()}</th>\n'
+            readDatos += f'\t<td><?= htmlspecialchars($fila["{nombre}"]) ?></td>\n'
+
+            # Update
+            if columna.COLUMN_KEY == 'PRI':
+                columnaPK = columna.COLUMN_NAME
+                logging.debug(f'Columna PK detectada: {columnaPK}')
+            else:
+                updateBindCampos += f'{nombre} = ?, '
+                updatePostCampos += f'\t\t$_POST["{nombre}"],\n'
+
+        updateBindCampos = updateBindCampos[:-2] + f'\n\t\tWHERE {columnaPK} = ? ;'
+        updatePostCampos += f'\t\t$_POST["{columnaPK}"]'
+
+        # quitamos última coma y espacio
+        nombresDeCampos = nombresDeCampos[:-2]  
+        bindCampos = bindCampos[:-2]
+        postCampos = postCampos[:-2]
+        
+        contenidoTabla = contenidoTabla.replace('%%NOMBRES_DE_CAMPOS%%', nombresDeCampos)
+        contenidoTabla = contenidoTabla.replace('%%BIND_CAMPOS%%', bindCampos)
+        contenidoTabla = contenidoTabla.replace('%%POST_CAMPOS%%', postCampos)
+        contenidoTabla = contenidoTabla.replace('%%FORM_CREATE_CAMPOS%%', formCreateCampos)
+        contenidoTabla = contenidoTabla.replace('%%READ_COLUMNS%%', readColumns)
+        contenidoTabla = contenidoTabla.replace('%%READ_DATOS%%', readDatos)
+        contenidoTabla = contenidoTabla.replace('%%UPDATE_BIND_CAMPOS%%', updateBindCampos)
+        contenidoTabla = contenidoTabla.replace('%%POST_UPDATE_CAMPOS%%', updatePostCampos)
+        contenidoTabla = contenidoTabla.replace('%%CAMPO_KEY%%', columnaPK)
+
+        columnasDef = f'// Tabla: {tabla.nombre}\n'
+        for columna in tabla.columnas:
+            columnasDef += f'//  + {columna.COLUMN_NAME} : {columna.DATA_TYPE}\n'
         contenidoTabla = contenidoTabla.replace('%%COLUMNAS_DEF%%', columnasDef)
         # Guardado
         File().save(plantillaOut + f'tabla_{tabla.nombre}.' + tipoSalida, contenidoTabla)
+    # TODO: Gestión de errores de consultas
+    #  TODO: Insert que ya existe
+
     # TODO: Subida a bbdd de ejemplo
     # TODO: CRUD
     # TODO: DAO 
