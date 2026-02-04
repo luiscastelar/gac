@@ -176,7 +176,7 @@ def main():
             nombresDeCampos += nombre + ', '
             bindCampos += '?, '
             postCampos += f'\t$_POST["{nombre}"],\n'
-            formCreateCampos += f'\t{nombre.upper()}:\n<input type="{dataType}" name="{nombre}" {required} /><br />\n'
+            formCreateCampos += f'<div class="mb-3">\t<label class="form-label">{nombre.upper()}</label>\n<input type="{dataType}" name="{nombre}" class="form-control" {required} /></div>\n'
             
             # Read
             readColumns += f'\t<th>{nombre.capitalize()}</th>\n'

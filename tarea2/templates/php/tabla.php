@@ -90,25 +90,42 @@ $filas = $pdo->query(
 <head>
 <meta charset="UTF-8">
 <title>CRUD %%TABLA_NOMBRE%%</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-    body { font-family: Arial, sans-serif; }
-    section { border:1px solid #999; padding:15px; margin-bottom:20px; }
+    body{
+        background-color:#f5f6f8;
+    }
+
+    .crud-section{
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    }
+
+    .crud-title{
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 6px;
+    }
+
 </style>
 </head>
 <body>
-
+<div class="container-md py-4">
 <h1>CRUD tabla %%TABLA_NOMBRE%%</h1>
 
 <!-- ===================================================== -->
 <!-- CREATE -->
 <!-- ===================================================== -->
 
-<section>
-<h2>CREATE – Alta de %%TABLA_NOMBRE%%</h2>
+<section class="crud-section">
+<h2 class="crud-title">CREATE – Alta de %%TABLA_NOMBRE%%</h2>
 
 <form method="post">
 %%FORM_CREATE_CAMPOS%%
-    <button type="submit" name="create">Crear</button>
+    <button type="submit" name="create" class="btn btn-success">Crear</button>
 </form>
 </section>
 
@@ -161,6 +178,6 @@ $filas = $pdo->query(
     <button type="submit" name="delete">Eliminar</button>
 </form>
 </section>
-
+</div>
 </body>
 </html>
