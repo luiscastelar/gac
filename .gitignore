@@ -2,9 +2,8 @@
 *.latex
 
 *.log
-salida.graphml
-salida.dot
 
+**/salida/*
 **/__pycache__/
 */gac/tarea2/gac2/
 **/tarea2/gac2/*
