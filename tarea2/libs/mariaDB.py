@@ -102,6 +102,15 @@ def read(conn, sql):
     finally:
         cursor.close()
 
+def convertDataType(tipo:str )->str:
+    match(tipo):
+        case 'int':
+            return 'number'
+        case 'varchar':
+            return 'text'
+        case _:
+            return 'text'
+        
 
 def printInfo(msg):
     """
