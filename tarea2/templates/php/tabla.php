@@ -2,6 +2,7 @@
 /* ==============================
    CONEXIÓN
    ============================== */
+%%COLUMNAS_DEF%%
 
 $env = parse_ini_file(__DIR__ . "/.env");
 
@@ -33,14 +34,12 @@ try {
 if (isset($_POST["create"])) {
 
     $stmt = $pdo->prepare(
-        "INSERT INTO alumno (nombre, email, edad)
-         VALUES (?, ?, ?)"
+        "INSERT INTO %%TABLA_NOMBRE%% (%%NOMBRES_DE_CAMPOS%%)
+         VALUES (%%BIND_CAMPOS%%)"
     );
 
     $stmt->execute([
-        $_POST["nombre"],
-        $_POST["email"],
-        $_POST["edad"]
+%%POST_CAMPOS%%
     ]);
 }
 
@@ -52,16 +51,12 @@ if (isset($_POST["create"])) {
 if (isset($_POST["update"])) {
 
     $stmt = $pdo->prepare(
-        "UPDATE alumno
-         SET nombre = ?, email = ?, edad = ?
-         WHERE id = ?"
+        "UPDATE %%TABLA_NOMBRE%%
+         SET %%UPDATE_BIND_CAMPOS%%"
     );
 
     $stmt->execute([
-        $_POST["nombre"],
-        $_POST["email"],
-        $_POST["edad"],
-        $_POST["id"]
+%%POST_UPDATE_CAMPOS%%
     ]);
 }
 
@@ -73,10 +68,10 @@ if (isset($_POST["update"])) {
 if (isset($_POST["delete"])) {
 
     $stmt = $pdo->prepare(
-        "DELETE FROM alumno WHERE id = ?"
+        "DELETE FROM %%TABLA_NOMBRE%% WHERE %%CAMPO_KEY%% = ?"
     );
 
-    $stmt->execute([$_POST["id"]]);
+    $stmt->execute([$_POST["%%CAMPO_KEY%%"]]);
 }
 
 
@@ -84,8 +79,8 @@ if (isset($_POST["delete"])) {
    READ
    ============================== */
 
-$alumnos = $pdo->query(
-    "SELECT * FROM alumno ORDER BY id"
+$filas = $pdo->query(
+    "SELECT * FROM %%TABLA_NOMBRE%% ORDER BY id"
 )->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
@@ -94,7 +89,7 @@ $alumnos = $pdo->query(
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>CRUD alumno</title>
+<title>CRUD %%TABLA_NOMBRE%%</title>
 <style>
     body { font-family: Arial, sans-serif; }
     section { border:1px solid #999; padding:15px; margin-bottom:20px; }
@@ -102,25 +97,17 @@ $alumnos = $pdo->query(
 </head>
 <body>
 
-<h1>CRUD tabla alumno</h1>
+<h1>CRUD tabla %%TABLA_NOMBRE%%</h1>
 
 <!-- ===================================================== -->
 <!-- CREATE -->
 <!-- ===================================================== -->
 
 <section>
-<h2>CREATE – Alta de alumno</h2>
+<h2>CREATE – Alta de %%TABLA_NOMBRE%%</h2>
 
 <form method="post">
-    Nombre:
-    <input type="text" name="nombre" required>
-
-    Email:
-    <input type="email" name="email">
-
-    Edad:
-    <input type="number" name="edad">
-
+%%FORM_CREATE_CAMPOS%%
     <button type="submit" name="create">Crear</button>
 </form>
 </section>
@@ -131,23 +118,15 @@ $alumnos = $pdo->query(
 <!-- ===================================================== -->
 
 <section>
-<h2>READ – Listado de alumnos</h2>
+<h2>READ – Listado de %%TABLA_NOMBRE%%</h2>
 
 <table border="1">
 <tr>
-    <th>ID</th>
-    <th>Nombre</th>
-    <th>Email</th>
-    <th>Edad</th>
-</tr>
+%%READ_COLUMNS%%</tr>
 
-<?php foreach ($alumnos as $a): ?>
+<?php foreach ($filas as $fila): ?>
 <tr>
-    <td><?= htmlspecialchars($a["id"]) ?></td>
-    <td><?= htmlspecialchars($a["nombre"]) ?></td>
-    <td><?= htmlspecialchars($a["email"]) ?></td>
-    <td><?= htmlspecialchars($a["edad"]) ?></td>
-</tr>
+%%READ_DATOS%%</tr>
 <?php endforeach; ?>
 
 </table>
@@ -159,21 +138,10 @@ $alumnos = $pdo->query(
 <!-- ===================================================== -->
 
 <section>
-<h2>UPDATE – Modificar alumno</h2>
+<h2>UPDATE – Modificar %%TABLA_NOMBRE%%</h2>
 
 <form method="post">
-    ID del alumno:
-    <input type="number" name="id" required>
-
-    Nuevo nombre:
-    <input type="text" name="nombre" required>
-
-    Nuevo email:
-    <input type="email" name="email">
-
-    Nueva edad:
-    <input type="number" name="edad">
-
+%%FORM_CREATE_CAMPOS%%
     <button type="submit" name="update">Actualizar</button>
 </form>
 </section>
@@ -184,7 +152,7 @@ $alumnos = $pdo->query(
 <!-- ===================================================== -->
 
 <section>
-<h2>DELETE – Borrar alumno</h2>
+<h2>DELETE – Borrar %%TABLA_NOMBRE%%</h2>
 
 <form method="post">
     ID del alumno:
