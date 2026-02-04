@@ -38,7 +38,7 @@ CREATE TABLE `calificaciones` (
   `alumnoId` int(11) NOT NULL,
   `valor` decimal(4,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (alumnoId) REFERENCES alumnos(id)
+  FOREIGN KEY (alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
