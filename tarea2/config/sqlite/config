@@ -1,0 +1,6 @@
+DB=ejemplos/db_in_sqlite.db
+SERVER=ejemplos/db_in_sqlite.db
+PORT=np
+USUARIO=np
+PASS=np
+SQL_ORIGINAL=ejemplos/db-sqlite.sql

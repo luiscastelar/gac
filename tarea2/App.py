@@ -29,8 +29,14 @@ def main():
     logging.debug(f'Variables de entorno: {variablesDeEntorno}')
 
     # DONE: Captura de entrada
-    #file = TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
-    file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
+    txt = '''Archivos de muestra preparados:
+  - dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y matrículas (MariaDB)
+  - db-sqlite.sql: DDL de ejemplo con tablas de albums, artists y tracks (SQLite)
+'''
+    print(txt)
+    #file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
+    #file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
+    file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
     sql = File().load(file)
     #sql = File().load('')
     #print(f'Archivo sql:\n{sql}')
@@ -39,19 +45,29 @@ def main():
     else:
         utils.printError('Error cargando sql', settings.EXIT['NOT_FOUND'])
 
+
+    r'''# Para ampliaciones:
     # DONE: Intento de inferencia de tipo de DDL
-    tipoDDL = pathlib.Path(file).suffix
-    logging.debug( tipoDDL )
+    extensonDelArchivo = pathlib.Path(file).suffix
+    logging.debug( extensonDelArchivo )
     # DONE: Tipo de DDL (sql, json schema, dbml)
-    tipoDDL = TUI.getTypeDDL(tipoDDL)
+    tipoDDL = TUI.getTypeDDL(extensonDelArchivo)
     logging.debug(f'Tipo de entrada: {tipoDDL}')
+    '''
 
     # DONE: Intentar inferencia de tipo de BBDD (mariadb, sqlite, oracledb,...)
     tipoDB = TUI.getTipoDB(sql)
+    logging.debug(f'Tipo de bbdd: {tipoDB}')
+    servidor = {}
+    servidor['TIPO_DB'] = tipoDB
+
 
     # DONE: Captura de config de servidor según tipo
-    servidor = Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config')
-    servidor['TIPO_DB'] = tipoDB
+    if tipoDB == 'sqlite':
+    #    servidor['file'] = file     
+        servidor.update( Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config') )
+    else:
+        servidor.update( Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config') )
     #settings.servidor = servidor
     logging.debug(f'Datos conexión a servidor: {servidor}')
     if len(servidor) > 0:
@@ -63,13 +79,14 @@ def main():
     match tipoDB:
         case 'mariadb':
             from libs import mariaDB as driverDB
-            driverDB.settings = settings
         case 'sqlite':
-            from libs import sqlite3 as driverDB
+            from libs import sqliteDB as driverDB
         case 'oracle-xe':
-            from libs import oracle as driverDB
+            from libs import oracleDB as driverDB
         case _:
             utils.printError(f'Gestor de BBDD {tipoDB} no disponible', settings.EXIT['FORMAT_ERROR'])
+
+    driverDB.settings = settings  # Cargamos las variables globales en el driver que corresponda
 
     # DONE: Comandos "normalizados" vía plantilla
     comandosSQL = Env.get(settings.TAREA_PATH + 'templates/' + tipoDB + '/sql')
@@ -91,9 +108,9 @@ def main():
         driverDB.dropDB(conn, dbName)
     if ope <= 2:
         driverDB.createDB(conn, dbName)
-    if ope <= 3:
         driverDB.loadFromSQL(conn, dbName, sql)
-
+    if ope <= 3:
+        pass
     # TODO: Captura de estructura según tipo 'templates/{{dbName}}/sql'
     metadatos = BaseDatos(dbName)
         # Captura de tablas
