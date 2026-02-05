@@ -9,3 +9,5 @@
 **/tarea2/gac2/*
 tarea2/infra
 virtualEnv/
+
+*.db
