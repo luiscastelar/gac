@@ -138,7 +138,7 @@ def main():
 
     # TODO: Normalización de metadatos?
     #   DONE: MariaDB: "DESCRIBE alumnos" (https://www.iditect.com/faq/python/how-to-extract-table-names-and-column-names-from-sql-query-in-python.html)
-    #   TODO: sqlite: "pragma table_info('albums');" (https://www.sqlitetutorial.net/sqlite-describe-table/, https://www.delftstack.com/es/howto/sqlite/sqlite-describe-table/)
+    #   DONE: sqlite: "pragma table_info('albums');" (https://www.sqlitetutorial.net/sqlite-describe-table/, https://www.delftstack.com/es/howto/sqlite/sqlite-describe-table/)
     #   TODO: OracleDB: https://stackoverflow.com/questions/72883480/how-to-display-a-description-of-a-table-in-oracle-sql
 
     # DONE: Eleccion de salida
@@ -166,9 +166,10 @@ def main():
         botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
     # FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
-    ventanaMain = File().load(
-        plantillaIn + indexFile).replace('%%BOTONES%%', botones)
+    ventanaMain = File().load(plantillaIn + indexFile).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
+    ventanaMain = ventanaMain.replace('%%UI_TYPE%%', tipoSalida)
+    ventanaMain = ventanaMain.replace('%%TIPO_DB%%', servidor['TIPO_DB'])
     logging.debug(ventanaMain)
     File().save(plantillaOut + indexFile, ventanaMain)
 
@@ -181,6 +182,8 @@ def main():
         #[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         pdoType = comandosSQL['pdo_type'].replace("%%DB%%", dbName)
         contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
+        contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', tipoSalida)
+        contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', servidor['TIPO_DB'])
         contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
         # Columnas
         nombresDeCampos = ''
