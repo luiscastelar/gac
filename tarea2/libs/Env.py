@@ -14,7 +14,7 @@ class Env():
 
         variablesDeEntorno = {}
         for linea in archivoEnv.split('\n'):
-            pares = linea.split('=')
+            pares = linea.split('=',1)
             if len(pares) >= 2:
                 key = pares[0]
                 value = pares[1]
