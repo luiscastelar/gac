@@ -7,4 +7,5 @@ insert=INSERT INTO %%COLUMNAS%% FROM %%TABLA%%;
 select=SELECT %%COLUMNAS%% FROM %% TABLAS%% WHERE %%FILTROS%%;
 update=UPDATE %%TABLA%% SET %%SETTERS%% WHERE %%FILTROS%%;
 delete=DELETE FROM %%TABLA%% WHERE %%FILTROS%%;
-pdo_type="sqlite:$db"
+pdo_type="sqlite:$db", null, null, array(PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => true, PDO::ERRMODE_EXCEPTION => true)
+#PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION
