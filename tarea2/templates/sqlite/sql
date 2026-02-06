@@ -1,6 +1,7 @@
 drop_database=DROP DATABASE %%DB%%;
-show_tables=SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name;
-show_columns=SELECT TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, COLUMN_TYPE, COLUMN_KEY, COLUMN_COMMENT FROM information_schema.columns WHERE TABLE_NAME like '%%TABLA%%';
+show_tables=SELECT name FROM sqlite_master WHERE type like 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name;
+#show_columns=SELECT * FROM pragma_table_info('%%TABLA%%');
+show_columns=SELECT '%%TABLA%%' AS table_name, name AS column_name, cid + 1 AS ordinal_position, dflt_value AS column_default, CASE 'notnull' WHEN 0 THEN 'YES' ELSE 'NO' END AS is_nullable, type AS data_type, NULL AS character_maximum_length, NULL AS numeric_precision, type AS column_type, CASE pk WHEN 1 THEN 'PRI' ELSE '' END AS column_key, NULL AS column_comment FROM pragma_table_info('%%TABLA%%');
 -show_columns=SELECT * FROM information_schema.columns WHERE TABLE_NAME like '%%TABLA%%';
 insert=INSERT INTO %%COLUMNAS%% FROM %%TABLA%%;
 select=SELECT %%COLUMNAS%% FROM %% TABLAS%% WHERE %%FILTROS%%;

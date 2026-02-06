@@ -76,6 +76,16 @@ def read(conn, sql):
     finally:
         cursor.close()
 
+def readSimpleList(conn, sql):
+    listOfTuples = read(conn, sql)
+    salida = []
+    for fila in listOfTuples:
+        arrayFila = []
+        for ele in fila:
+            arrayFila.append(ele)
+        salida.append(arrayFila)
+    return salida
+
 def convertDataType(tipo:str )->str:
     match(tipo):
         case 'int':
