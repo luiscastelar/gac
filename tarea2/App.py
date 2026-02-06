@@ -23,10 +23,6 @@ def main():
     TUI.settings = settings
     utils.settings = settings
 
-    # DONE: Captura de variables de entorno
-    variablesDeEntorno = Env.get(settings.TAREA_PATH + settings.ENV)
-    logging.debug(f'Variables de entorno: {variablesDeEntorno}')
-
     # DONE: Captura de entrada
     txt = '''Archivos de muestra preparados:
   - dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y
@@ -77,8 +73,14 @@ def main():
     match tipoDB:
         case 'mariadb':
             from libs import mariaDB as driverDB
+            # DONE: Captura de variables de entorno
+            variablesDeEntorno = Env.get(settings.TAREA_PATH + settings.ENV)
+            logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'sqlite':
             from libs import sqliteDB as driverDB
+            # DONE: Captura de variables de entorno
+            variablesDeEntorno = Env.get(settings.TAREA_PATH + 'sqlite.env')
+            logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'oracle-xe':
             from libs import oracleDB as driverDB
         case _:
@@ -173,8 +175,13 @@ def main():
     # TODO: Páginas individuales por tabla
     plantillaTabla = File().load(plantillaIn + 'tabla.' + tipoSalida)
     for tabla in metadatos.tablas:
-        contenidoTabla = plantillaTabla.replace(
-            '%%TABLA_NOMBRE%%', tabla.nombre)
+        #"mysql:host=$host;dbname=$db;charset=utf8mb4",
+        #$user,
+        #$pass,
+        #[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        pdoType = comandosSQL['pdo_type'].replace("%%DB%%", dbName)
+        contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
+        contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
         # Columnas
         nombresDeCampos = ''
         bindCampos = ''
@@ -254,8 +261,8 @@ def main():
     # + oracle-xe:
     if tipoSalida == 'php':
         utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["PUERTO"]}')
-        varEnv = f'''#HOST={variablesDeEntorno["host"]}
-HOST=mariadb
+        varEnv = f'''HOST={variablesDeEntorno["host"]}
+#HOST=mariadb
 DB={variablesDeEntorno["db"]}
 USER={variablesDeEntorno["user"]}
 PASS={variablesDeEntorno["pass"]}

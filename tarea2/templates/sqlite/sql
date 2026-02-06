@@ -7,4 +7,4 @@ insert=INSERT INTO %%COLUMNAS%% FROM %%TABLA%%;
 select=SELECT %%COLUMNAS%% FROM %% TABLAS%% WHERE %%FILTROS%%;
 update=UPDATE %%TABLA%% SET %%SETTERS%% WHERE %%FILTROS%%;
 delete=DELETE FROM %%TABLA%% WHERE %%FILTROS%%;
-
+pdo_type="sqlite:$db"

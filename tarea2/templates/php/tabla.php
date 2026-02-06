@@ -16,12 +16,8 @@ $user = $env["USER"];
 $pass = $env["PASS"];
 
 try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$db;charset=utf8mb4",
-        $user,
-        $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    print_r($db);
+    $pdo = new PDO(%%PDO_TYPE%%);
 } catch (PDOException $e) {
     die("Error de conexión: " . $e->getMessage());
 }
