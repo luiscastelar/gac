@@ -16,7 +16,6 @@ $user = $env["USER"];
 $pass = $env["PASS"];
 
 try {
-    print_r($db);
     $pdo = new PDO(%%PDO_TYPE%%);
 } catch (PDOException $e) {
     die("Error de conexión: " . $e->getMessage());
@@ -92,15 +91,10 @@ $filas = $pdo->query(
 </head>
 <body>
 <div class="container-md py-4">
-<!--
-Source - https://stackoverflow.com/a/57361587
-Posted by Alessio Cantarella, modified by community. See post 'Timeline' for change history
-Retrieved 2026-02-04, License - CC BY-SA 4.0
--->
 
-<div class="btn btn-success"><a href="index.php">Volver</a></div>
-
-<h1>CRUD tabla %%TABLA_NOMBRE%%</h1>
+<h1 class="mb4">DB: %%TIPO_DB%% ➡️ UI: %%UI_TYPE%%</h1>
+<!--<h2 class="mb4">Tablas disponibles en la base de datos</h2>-->
+<h2>CRUD tabla %%TABLA_NOMBRE%%</h2>
 <div class="accordion" id="crudAccordion">
     <!-- ===================================================== -->
     <!-- CREATE -->
@@ -110,7 +104,7 @@ Retrieved 2026-02-04, License - CC BY-SA 4.0
             <button class="accordion-button collapsed" type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseCreate">
-            CRUD tabla %%TABLA_NOMBRE%%
+            CREATE tabla %%TABLA_NOMBRE%%
             </button>
         </h2>
 
@@ -217,5 +211,7 @@ Retrieved 2026-02-04, License - CC BY-SA 4.0
         </div>
     </div>
 </div>
+
+<div class="btn btn-success"><a href="index.php">Volver</a></div>
 </body>
 </html>

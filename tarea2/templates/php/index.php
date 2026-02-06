@@ -10,7 +10,8 @@
 <body class="bg-light">
     <div class="min-vh-100 d-flex align-items-center">
         <div class="container-md py-4">
-            <h1 class="mb4">Tablas disponibles en la base de datos</H1>
+            <h1 class="mb4">DB: %%TIPO_DB%% ➡️ UI: %%UI_TYPE%%</h1>
+            <h2 class="mb4">Tablas disponibles en la base de datos</h2>
             <div class="list-group">
 %%BOTONES%%
             </div>
