@@ -102,6 +102,22 @@ def read(conn, sql):
     finally:
         cursor.close()
 
+
+def readSimpleList(conn, sql):
+    lista = read(conn, sql)
+    simpleList = []
+    for ele in lista:
+        simpleList.append(dictToList(ele))
+    return simpleList
+
+
+def dictToList(ele):
+    lista = []
+    for k, v in ele.items():
+        lista.append(v)
+    return lista
+
+
 def convertDataType(tipo:str )->str:
     match(tipo):
         case 'int':

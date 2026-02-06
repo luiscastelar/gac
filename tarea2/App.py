@@ -1,7 +1,6 @@
 # ---------------------------------------------------------------------
 # Importaciones
 # ---------------------------------------------------------------------
-import pathlib
 from libs.Env import Env
 from libs.contentOfFile import File
 import libs.TUI as TUI
@@ -25,26 +24,27 @@ def main():
     utils.settings = settings
 
     # DONE: Captura de variables de entorno
-    variablesDeEntorno = Env.get(settings.TAREA_PATH + settings.ENV) 
+    variablesDeEntorno = Env.get(settings.TAREA_PATH + settings.ENV)
     logging.debug(f'Variables de entorno: {variablesDeEntorno}')
 
     # DONE: Captura de entrada
     txt = '''Archivos de muestra preparados:
-  - dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y matrículas (MariaDB)
-  - db-sqlite.sql: DDL de ejemplo con tablas de albums, artists y tracks (SQLite)
+  - dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y
+    matrículas (MariaDB)
+  - db-sqlite.sql: DDL de ejemplo con tablas de albums, artists y
+    tracks (SQLite)
 '''
     print(txt)
-    #file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
+    # file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
     #file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
     file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
     sql = File().load(file)
-    #sql = File().load('')
-    #print(f'Archivo sql:\n{sql}')
+    # sql = File().load('')
+    # print(f'Archivo sql:\n{sql}')
     if len(sql) > 0:
         print(f'1. Archivo {file} cargado correctamente.')
     else:
         utils.printError('Error cargando sql', settings.EXIT['NOT_FOUND'])
-
 
     r'''# Para ampliaciones:
     # DONE: Intento de inferencia de tipo de DDL
@@ -61,14 +61,12 @@ def main():
     servidor = {}
     servidor['TIPO_DB'] = tipoDB
 
-
     # DONE: Captura de config de servidor según tipo
-    if tipoDB == 'sqlite':
-    #    servidor['file'] = file     
-        servidor.update( Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config') )
-    else:
-        servidor.update( Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config') )
-    #settings.servidor = servidor
+    servidor.update(
+        Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config')
+    )
+
+    # settings.servidor = servidor
     logging.debug(f'Datos conexión a servidor: {servidor}')
     if len(servidor) > 0:
         print(f'2. Tipo {tipoDB} procesado y datos de conexión recibidos')
@@ -90,11 +88,10 @@ def main():
 
     # DONE: Comandos "normalizados" vía plantilla
     comandosSQL = Env.get(settings.TAREA_PATH + 'templates/' + tipoDB + '/sql')
-    #print(comandosSQL)
 
     # DONE: Import en db pruebas
-    ope = TUI.operacionesDeImportacion()    
-    
+    ope = TUI.operacionesDeImportacion()
+
     # TODO: Carga de metadatos
     host = servidor['SERVER']
     port = servidor['PORT']
@@ -103,7 +100,7 @@ def main():
     password = servidor['PASS']
     conn = driverDB.getConn(host, port, user, password)
     if ope <= 0:
-        utils.printError(f'Operación {ope} sobre db no disponible',1)
+        utils.printError(f'Operación {ope} sobre db no disponible', 1)
     if ope == 1:
         driverDB.dropDB(conn, dbName)
     if ope <= 2:
@@ -113,25 +110,29 @@ def main():
         pass
     # TODO: Captura de estructura según tipo 'templates/{{dbName}}/sql'
     metadatos = BaseDatos(dbName)
-        # Captura de tablas
+    # Captura de tablas
     sql = comandosSQL['show_tables'].replace("%%DB%%", dbName)
     tablas = []
-    for tab in driverDB.read(conn, sql):
-        nombreTabla = tab.get('TABLE_NAME','-E-')
+    # Lista de columnas
+    atributos = ['TABLE_NAME', 'COLUMN_NAME', 'ORDINAL_POSITION', 'COLUMN_DEFAULT', 'IS_NULLABLE', 'DATA_TYPE', 'CHARACTER_MAXIMUM_LENGTH', 'NUMERIC_PRECISION', 'COLUMN_TYPE', 'COLUMN_KEY', 'COLUMN_COMMENT']
+    for tab in driverDB.readSimpleList(conn, sql):
+        nombreTabla = tab[0]
         # Captura de columnas
         sql = comandosSQL['show_columns'].replace('%%TABLA%%', nombreTabla)
-        columnas = driverDB.read(conn, sql)
+        columnas = driverDB.readSimpleList(conn, sql)
         tabla = Tabla(nombreTabla)
         for col in columnas:
-            columnaNombre = col['COLUMN_NAME']
+            columnaNombre = col[1]
             columna = Columna(columnaNombre)
-            for k,v in col.items():
+            for i in range(0, len(col)):
+                k = atributos[i]
+                v = col[i]
                 setattr(columna, k, v)
-            tabla.columnas.append( columna )    # añadimos columna a columnas[]
-        tablas.append( tabla )                  # añadimos tabla a tablas[]
+            tabla.columnas.append(columna)    # añadimos columna a columnas[]
+        tablas.append(tabla)                  # añadimos tabla a tablas[]
     metadatos.tablas = tablas                   # añadimos tablas a db
     logging.debug('Metadatos capturados:\n' + metadatos.str())
-    #print(metadatos.str())
+    # print(metadatos.str())
 
     # TODO: Normalización de metadatos?
     #   DONE: MariaDB: "DESCRIBE alumnos" (https://www.iditect.com/faq/python/how-to-extract-table-names-and-column-names-from-sql-query-in-python.html)
@@ -143,12 +144,12 @@ def main():
     logging.debug(f'Tipo de salida: {tipoSalida}')
 
     #   TODO: PHP
-        #tipoSalida = 'php'
-        #indexFile = 'index.'+tipoSalida
+    # tipoSalida = 'php'
+    # indexFile = 'index.'+tipoSalida
     #   TODO: TKINTER
-        #tipoSalida = 'python'    
-        #indexFile = 'CRUD.py'
-    alturaVentana = len(metadatos.tablas) * 50 + 50  # altura variable por cada botón
+    # tipoSalida = 'python'
+    # indexFile = 'CRUD.py'
+    alturaVentana = len(metadatos.tablas) * 50 + 50  # altura variable
     #   TODO: JSP
 
     # TODO: Posible pagina índice de tablas
@@ -157,21 +158,23 @@ def main():
     plantillaBoton = File().load(plantillaIn + 'boton.template')
     botones = ''
     uiId = 1  # Identif. de elemento gráfico
-    for tabla in metadatos.tablas:                
-        boton =  plantillaBoton.replace('%%ID%%', str(uiId))
+    for tabla in metadatos.tablas:
+        boton = plantillaBoton.replace('%%ID%%', str(uiId))
         uiId += 1
-        botones +=  boton.replace('%%TEXTO%%', tabla.nombre)+'\n'        
+        botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
-    #FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
-    ventanaMain = File().load(plantillaIn + indexFile).replace('%%BOTONES%%', botones)
+    # FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
+    ventanaMain = File().load(
+        plantillaIn + indexFile).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
-    logging.debug( ventanaMain )
+    logging.debug(ventanaMain)
     File().save(plantillaOut + indexFile, ventanaMain)
 
     # TODO: Páginas individuales por tabla
     plantillaTabla = File().load(plantillaIn + 'tabla.' + tipoSalida)
     for tabla in metadatos.tablas:
-        contenidoTabla = plantillaTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
+        contenidoTabla = plantillaTabla.replace(
+            '%%TABLA_NOMBRE%%', tabla.nombre)
         # Columnas
         nombresDeCampos = ''
         bindCampos = ''
@@ -188,13 +191,13 @@ def main():
             # Form
             dataType = driverDB.convertDataType(columna.DATA_TYPE)
             required = 'required' if columna.IS_NULLABLE.upper() == 'NO' else ''
-            
+
             # Create
             nombresDeCampos += nombre + ', '
             bindCampos += '?, '
             postCampos += f'\t$_POST["{nombre}"],\n'
             formCreateCampos += f'<div class="mb-3">\t<label class="form-label">{nombre.upper()}</label>\n<input type="{dataType}" name="{nombre}" class="form-control" {required} /></div>\n'
-            
+
             # Read
             readColumns += f'\t<th>{nombre.capitalize()}</th>\n'
             readDatos += f'\t<td><?= htmlspecialchars($fila["{nombre}"]) ?></td>\n'
@@ -211,10 +214,10 @@ def main():
         updatePostCampos += f'\t\t$_POST["{columnaPK}"]'
 
         # quitamos última coma y espacio
-        nombresDeCampos = nombresDeCampos[:-2]  
+        nombresDeCampos = nombresDeCampos[:-2]
         bindCampos = bindCampos[:-2]
         postCampos = postCampos[:-2]
-        
+
         contenidoTabla = contenidoTabla.replace('%%NOMBRES_DE_CAMPOS%%', nombresDeCampos)
         contenidoTabla = contenidoTabla.replace('%%BIND_CAMPOS%%', bindCampos)
         contenidoTabla = contenidoTabla.replace('%%POST_CAMPOS%%', postCampos)
@@ -236,27 +239,27 @@ def main():
 
     # TODO: Subida a bbdd de ejemplo
     # TODO: CRUD
-    # TODO: DAO 
+    # TODO: DAO
     # php
     # python
     # nodejs
     # ¿jakarta?
-    # TODO: Frontend (plantillas) -> 
+    # TODO: Frontend (plantillas) ->
     # js
     # python/tkinter (https://www.youtube.com/watch?v=bwX5HnfyhfU)
     # ¿javaFX?
     # TODO: Exportación para obtener una definición exacta
     # + mariaDB: env $(cat .env | xargs)  bash -c ' docker exec -i mariaDB mysqldump -u"$user" -p"$pass" "$db" > dump-$db.sql'
     # + sqlite:
-    # + oracle-xe: 
+    # + oracle-xe:
     if tipoSalida == 'php':
         utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["PUERTO"]}')
-        varEnv = f'''
-#HOST={variablesDeEntorno["host"]}
+        varEnv = f'''#HOST={variablesDeEntorno["host"]}
 HOST=mariadb
 DB={variablesDeEntorno["db"]}
 USER={variablesDeEntorno["user"]}
 PASS={variablesDeEntorno["pass"]}
+TIPO_DB={tipoDB}
 '''
         File().save(plantillaOut + '.env', varEnv)
         import shutil
@@ -265,9 +268,6 @@ PASS={variablesDeEntorno["pass"]}
     pass
 
 
-
-
-
 # Autocargador de programa externo
 if __name__ == "__main__":
-     main()
+    main()
