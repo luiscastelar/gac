@@ -10,6 +10,13 @@
 
 # Problemas y soluciones
 
+## Estandarización de variables de entorno
+El desarrollo planificado inicialmente ha cambiado teniendo distintas ubicaciones para las variables:
+1. `.env` y `sqlite.env` en la raíz.
+2. Archivos de configuración en `./config`
+
+La solución propuesta es trasladar todas las variables de entorno a directorio `./config`, incluso las que necesitan los sevicios ofrecidos por los contenedores (_docker_).
+
 ## Readonly database
 **Problema**: Si obtenemos un mensaje 
 ```
