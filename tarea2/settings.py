@@ -5,6 +5,7 @@ import logging
 # Constantes
 # ---------------------------------------------------------------------
 TAREA_PATH = os.path.dirname(__file__) + '/'
+realPathDB = ''
 
 LOGGING = logging.DEBUG       # modo de depuración
 

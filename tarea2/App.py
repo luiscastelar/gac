@@ -80,6 +80,7 @@ def main():
             from libs import sqliteDB as driverDB
             # DONE: Captura de variables de entorno
             variablesDeEntorno = Env.get(settings.TAREA_PATH + 'sqlite.env')
+            settings.realPathDB = variablesDeEntorno['realPathDB']
             logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'oracle-xe':
             from libs import oracleDB as driverDB
@@ -106,7 +107,7 @@ def main():
     if ope == 1:
         driverDB.dropDB(conn, dbName)
     if ope <= 2:
-        driverDB.createDB(conn, dbName)
+        conn = driverDB.createDB(conn, dbName)
         driverDB.loadFromSQL(conn, dbName, sql)
     if ope <= 3:
         pass
@@ -142,7 +143,8 @@ def main():
     #   TODO: OracleDB: https://stackoverflow.com/questions/72883480/how-to-display-a-description-of-a-table-in-oracle-sql
 
     # DONE: Eleccion de salida
-    tipoSalida, indexFile = TUI.eleccionDeSalida()
+    #tipoSalida, indexFile = TUI.eleccionDeSalida()
+    tipoSalida, indexFile = 'php', 'index.php'
     logging.debug(f'Tipo de salida: {tipoSalida}')
 
     #   TODO: PHP
@@ -275,6 +277,8 @@ TIPO_DB={tipoDB}
         import shutil
         shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
         shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
+        import os #, stat
+        os.chmod(settings.TAREA_PATH + servidor['DB'], 0o777)
     pass
 
 
