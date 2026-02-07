@@ -45,7 +45,7 @@ def createDB(conexion, db):
         )
         conexion.commit()
         printInfo(f"Base de datos '{db}' creada o ya existente.")
-
+        return conexion
     except mysql.connector.Error as err:
         print(f"Error al crear la base de datos '{db}': {err}")
 
