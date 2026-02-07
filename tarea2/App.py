@@ -80,7 +80,6 @@ def main():
             from libs import sqliteDB as driverDB
             # DONE: Captura de variables de entorno
             variablesDeEntorno = Env.get(settings.TAREA_PATH + 'sqlite.env')
-            settings.realPathDB = variablesDeEntorno['realPathDB']
             logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'oracle-xe':
             from libs import oracleDB as driverDB
