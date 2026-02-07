@@ -8,6 +8,26 @@
 7. Si se gestionan los atributos obligatorios mediante el empleo de "required"
 8. Si se gestionan las actualizaciones y borrados de los tablas vinculadas mediante "ON DELETE CASCADE ON UPDATE CASCADE"
 
+# Problemas y soluciones
+
+## Readonly database
+**Problema**: Si obtenemos un mensaje 
+```
+Warning: PDOStatement::execute(): SQLSTATE[HY000]: General error: 8 attempt to write a readonly database
+```
+deberemos dar permisos adecuados al directororio `salida/php` ya que estamos ejecutando el servidor _nginx-php_ con el usuario _www-data_ (id:33) y habitualmente seremos otro usuario con id:1000.
+
+**Solución**:
+Otorgar permisos completos para todos los usuarios en dicho directorio:
+```
+sudo chmod 777 -R salida/php
+``` 
+Con el ello el usuario _www-data_ (id:33) podrá escribir en el directorio.
+
+**Mejoras**: 
+Deberíamos montar en un volumen diferente la base de datos en un directorio con permisos completos y mantener el directorio `salida/php` con permisos simples 744.
+
+
 # Lo obviado
 El motivo de este trabajo es la generación automática de código por lo que se han obviado los siguientes conceptos:
 1. Seguridad: para su utilización real se debería establecer un mecanismo de autenticación para el acceso a la base de datos, o si estamos generando una herramienta abierta, el usuario deberá proporcionar las credenciales.
