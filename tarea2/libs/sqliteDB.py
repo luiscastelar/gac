@@ -14,8 +14,9 @@ def getConn(host, port, user, password):
 
     :return: conexión activa a la base de datos
     """
-    print(f"Conectando a la base de datos SQLite en '{host}'...")
-    conn = sqlite3.connect(settings.TAREA_PATH + host)
+    fileDB = settings.TAREA_PATH + host
+    print(f"Conectando a la base de datos SQLite en '{fileDB}'...")
+    conn = sqlite3.connect(fileDB)
     return conn
 
 def dropDB(conexion, db):    
@@ -27,9 +28,9 @@ def dropDB(conexion, db):
     :return: conexión activa a la base de datos
     """
     try:
-        from os import remove
-        remove(settings.TAREA_PATH + db)
-        return getConn(db, None, None, None)
+        from pathlib import Path
+        Path.unlink(settings.TAREA_PATH + db)
+        print(f'BBDD eliminada')                
     except sqlite3.Error as err:
         print(f"Error al eliminar la base de datos '{db}': {err}")
 
@@ -41,7 +42,12 @@ def createDB(conexion, db):
     :param conexion: np
     :param db: nombre de la base de datos
     """
-    pass
+    conexion = getConn(db, None, None, None)
+    if conexion != None:
+        print(f'BBDD "{db}" creada nuevamente')
+        return conexion
+    else:
+        print(f'Problemas creando la "{db}"')
 
 def loadFromSQL(conn, db, sql):
     """
