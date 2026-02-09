@@ -4,6 +4,8 @@ settings = None
 
 def getConn(host, port, user, password):
     "Estandarizamos la conexión a bbdd"
+    if (host == 'mariadb'):
+        host = 'localhost'
     conn = mysql.connector.connect(host=host, port=port, user=user, password=password)
     return conn
 

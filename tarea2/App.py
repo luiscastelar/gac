@@ -54,17 +54,16 @@ def main():
     # DONE: Intentar inferencia de tipo de BBDD (mariadb, sqlite, oracledb,...)
     tipoDB = TUI.getTipoDB(sql)
     logging.debug(f'Tipo de bbdd: {tipoDB}')
-    servidor = {}
-    servidor['TIPO_DB'] = tipoDB
+    variablesDeEntorno = {}
+    variablesDeEntorno['TIPO_DB'] = tipoDB
 
     # DONE: Captura de config de servidor según tipo
-    servidor.update(
+    variablesDeEntorno.update(
         Env.get(settings.TAREA_PATH + 'config/' + tipoDB + '/config')
     )
+    logging.debug(f'Datos conexión a variablesDeEntorno: {variablesDeEntorno}')
 
-    # settings.servidor = servidor
-    logging.debug(f'Datos conexión a servidor: {servidor}')
-    if len(servidor) > 0:
+    if len(variablesDeEntorno) > 0:
         print(f'2. Tipo {tipoDB} procesado y datos de conexión recibidos')
     else:
         utils.printError('Error datos de conexion', settings.EXIT['NOT_FOUND'])
@@ -73,14 +72,8 @@ def main():
     match tipoDB:
         case 'mariadb':
             from libs import mariaDB as driverDB
-            # DONE: Captura de variables de entorno
-            variablesDeEntorno = Env.get(settings.TAREA_PATH + settings.ENV)
-            logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'sqlite':
             from libs import sqliteDB as driverDB
-            # DONE: Captura de variables de entorno
-            variablesDeEntorno = Env.get(settings.TAREA_PATH + 'sqlite.env')
-            logging.debug(f'Variables de entorno: {variablesDeEntorno}')
         case 'oracle-xe':
             from libs import oracleDB as driverDB
         case _:
@@ -95,11 +88,11 @@ def main():
     ope = TUI.operacionesDeImportacion()
 
     # TODO: Carga de metadatos
-    host = servidor['SERVER']
-    port = servidor['PORT']
-    user = servidor['USUARIO']
-    dbName = servidor['DB']
-    password = servidor['PASS']
+    host = variablesDeEntorno['SERVER_DB']
+    port = variablesDeEntorno['PORT_DB']
+    user = variablesDeEntorno['USER_DB']
+    dbName = variablesDeEntorno['NAME_DB']
+    password = variablesDeEntorno['PASS_DB']
     conn = driverDB.getConn(host, port, user, password)
     if ope <= 0:
         utils.printError(f'Operación {ope} sobre db no disponible', 1)
@@ -145,6 +138,11 @@ def main():
     #tipoSalida, indexFile = TUI.eleccionDeSalida()
     tipoSalida, indexFile = 'php', 'index.php'
     logging.debug(f'Tipo de salida: {tipoSalida}')
+    # DONE: Captura de config de servidor según tipo
+    variablesDeEntorno.update(
+        Env.get(settings.TAREA_PATH + 'config/' + tipoSalida + '/config')
+    )
+    logging.debug(f'Datos conexión a variablesDeEntorno: {variablesDeEntorno}')
 
     #   TODO: PHP
     # tipoSalida = 'php'
@@ -170,7 +168,7 @@ def main():
     ventanaMain = File().load(plantillaIn + indexFile).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
     ventanaMain = ventanaMain.replace('%%UI_TYPE%%', tipoSalida)
-    ventanaMain = ventanaMain.replace('%%TIPO_DB%%', servidor['TIPO_DB'])
+    ventanaMain = ventanaMain.replace('%%TIPO_DB%%', variablesDeEntorno['TIPO_DB'])
     logging.debug(ventanaMain)
     File().save(plantillaOut + indexFile, ventanaMain)
 
@@ -184,7 +182,7 @@ def main():
         pdoType = comandosSQL['pdo_type'].replace("%%DB%%", dbName)
         contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
         contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', tipoSalida)
-        contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', servidor['TIPO_DB'])
+        contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', variablesDeEntorno['TIPO_DB'])
         contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
         # Columnas
         nombresDeCampos = ''
@@ -264,12 +262,11 @@ def main():
     # + sqlite:
     # + oracle-xe:
     if tipoSalida == 'php':
-        utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["PUERTO"]}')
-        varEnv = f'''HOST={variablesDeEntorno["host"]}
-#HOST=mariadb
-DB={variablesDeEntorno["db"]}
-USER={variablesDeEntorno["user"]}
-PASS={variablesDeEntorno["pass"]}
+        utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["WWW_PORT"]}')
+        varEnv = f'''HOST={variablesDeEntorno["SERVER_DB"]}
+DB={variablesDeEntorno["NAME_DB"]}
+USER={variablesDeEntorno["USER_DB"]}
+PASS={variablesDeEntorno["PASS_DB"]}
 TIPO_DB={tipoDB}
 '''
         File().save(plantillaOut + '.env', varEnv)
@@ -277,7 +274,7 @@ TIPO_DB={tipoDB}
         shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
         shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
         import os #, stat
-        os.chmod(settings.TAREA_PATH + servidor['DB'], 0o777)
+        os.chmod(settings.TAREA_PATH + variablesDeEntorno['NAME_DB'], 0o777)
     pass
 
 

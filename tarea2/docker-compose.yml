@@ -1,19 +1,7 @@
-# ---------------------------------------------------------------
-#     Receta para levantar:
-#  + un servidor MariaDB
-#  + un servidor PostgreSQL
-#  + un cliente ligero Adminer (postgreSQL y MariaDB)
-#  - (PDTE) un cliente pesado PHPMyAdmin (sólo MariaDB)
-#
-# Recuerda:
-#  + Para levantar los contenedores: `docker-compose up -d`
-#  + Para destruir los contenedores: `docker-compose down`
-#  + Para verificar si funcionan: `docker-compose ps`
-#  + Para ver los logs del sistema: `docker-compose logs`
-# ---------------------------------------------------------------
 services:
   mariaDB:
-#    env_file: ./env.pass
+    env_file: ./config/mariadb/config  
+    # Solo válidas dentro de los contenedores, no en este compose.yml
     user: "${ID_USUARIO}:${ID_USUARIO}"
     container_name: mariaDB
     image: mariadb:10.11
@@ -24,41 +12,19 @@ services:
 
     environment:
       TZ: 'Europe/Madrid'
-      MARIADB_ROOT_PASSWORD: ${passRoot}
-      MARIADB_DATABASE: ${db}
-      MARIADB_USER: ${user}
-      MARIADB_PASSWORD: ${pass}
-# Deberéis crear un archivo denominado .env con las credenciales
-#   passRoot=password_de_root
-#   db=nombre_de_DB
-#   user=nombre_usuario
-#   pass=pass_de_usuario
 
     volumes:
       - ./infra/mariadb:/var/lib/mysql
 # Importar detos con:
 #  env $(cat .env | xargs)  bash -c ' docker exec -i mariaDB mysql -u"$user" -p"$pass" "$db" < ../ejemplos/alumnos.sql '
-
     ports:
       - 3306:3306
-# Si tenéis conflictos con XAMPP o lo que sea sólo tenéis que cambiar 
-# el número de la izquierda de los dos puntos. Por ejemplo: 
-#    - 13306:3306
-# Luego accederéis por ese puerto desde vuestro cliente de BBDD
-
-#  sqlite:
-#    user: "${ID_USUARIO}:${ID_USUARIO}"
-#    image: alpine/sqlite
-#    volumes:
-#      - ./infra/sqlite/test.db:/apps/test.db
-# docker run -ti --rm -v $(pwd):/apps -w /apps alpine/sqlite test.db "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);"
 
   oracle-xe:
+    env_file: ./config/oracle/config 
     user: "${ID_USUARIO}:${ID_USUARIO}"
     ports:
       - 1521:1521
-    environment:
-      - ORACLE_PASSWORD=${passRoot}
     volumes:
       - ./infra/oracle-xe:/u01/app/oracle/oradata 
       - ./infra/scripts:/scripts
@@ -69,7 +35,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - ${PUERTO}:80
+      - ${WWW_PUERTO}:80
     volumes:
       - ./salida/php:/var/www/html/
       - ./default.conf:/etc/nginx/conf.d/default.conf
