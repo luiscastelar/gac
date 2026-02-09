@@ -32,8 +32,8 @@ def main():
 '''
     print(txt)
     # file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
-    #file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
-    file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
+    file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
+    #file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
     sql = File().load(file)
     # sql = File().load('')
     # print(f'Archivo sql:\n{sql}')
@@ -264,7 +264,7 @@ def main():
     if tipoSalida == 'php':
         utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["WWW_PORT"]}')
         varEnv = f'''HOST={variablesDeEntorno["SERVER_DB"]}
-DB={variablesDeEntorno["NAME_DB"]}
+DB={variablesDeEntorno["DOCKER_DB"]}
 USER={variablesDeEntorno["USER_DB"]}
 PASS={variablesDeEntorno["PASS_DB"]}
 TIPO_DB={tipoDB}
