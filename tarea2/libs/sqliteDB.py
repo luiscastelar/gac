@@ -2,6 +2,9 @@
 import sqlite3
 
 settings = None
+dbName = None
+comandosSQL = None
+conn = None
 
 def getConn(host, port, user, password):
     """

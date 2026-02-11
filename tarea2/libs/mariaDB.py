@@ -1,6 +1,9 @@
 import mysql.connector
 
 settings = None
+dbName = None
+comandosSQL = None
+conn = None
 
 def getConn(host, port, user, password):
     "Estandarizamos la conexión a bbdd"
