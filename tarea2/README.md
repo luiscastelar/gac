@@ -41,3 +41,9 @@ El motivo de este trabajo es la generación automática de código por lo que se
 2. A prueba de fallos: existen múltiples consultas que pueden arrojar excepciones que detienen la aplicación y deberían ser adecuadamente atrapadas y procesadas.
 3. No gestiono los ID. Esto es, el usuario debe indicar un ID que no existe para CREAR, o uno que existe para MODICAR o ELIMINAR
 4. No gestiono los Foreign Key de las tablas. El usuario deber crear la tabla madre antes de insertar en la tabla derivada.
+
+
+# Herramientas
+## Exportación para obtener una definición exacta
++ DONE: mariaDB: env $(cat .env | xargs)  bash -c ' docker exec -i mariaDB mysqldump -u"$user" -p"$pass" "$db" > dump-$db.sql'
++ DONE: sqlite: script bash

@@ -50,128 +50,36 @@ def main():
     #tipoSalida, indexFile = TUI.eleccionDeSalida()
     tipoSalida, indexFile = 'php', 'index.php'
     #tipoSalida, indexFile = 'python', 'crud.py'
+    variablesDeEntorno.update({
+        'tipoSalida': tipoSalida,
+        'indexFile': indexFile
+    })
     logging.debug(f'Tipo de salida: {tipoSalida}')
     
     # DONE: 10. Captura de config de servidor según tipo de salida
     variablesDeEntorno.update(
         Env.get(settings.TAREA_PATH + 'config/' + tipoSalida + '/config')
     )
+    
     logging.debug(f'Datos conexión a variablesDeEntorno: {variablesDeEntorno}')
 
-    # DONE: 11. Generación de código de salida (plantillas)
-    alturaVentana = len(metadatos.tablas) * 50 + 50  # altura variable
+    # DONE: 11. Importacion de driver salida según tipo (DAO)
+    out = getDriverSalida(tipoSalida)
+    out.settings = settings
+    out.logging = logging
+
+    # TODO: 12. Generar indice de tablas
+    out.generarIndex(metadatos, variablesDeEntorno)
+
+    # TODO: 13. Generar CRUDs individuales por tabla
+    for tabla in metadatos.tablas:
+        out.generarCRUD(tabla, db, variablesDeEntorno)
+
+    # TODO: 14. Construir APP de salida (en php, python, etc.) con plantilla común y fragmentos por tabla
+    out.buildApp(variablesDeEntorno)
+
+    # PDTE: 15. Gestión de errores de consultas: insert, update, delete
     
-    # TODO: Posible pagina índice de tablas
-    plantillaIn = settings.TAREA_PATH + 'templates/' + tipoSalida + '/'
-    plantillaOut = settings.TAREA_PATH + 'salida/' + tipoSalida + '/'
-    plantillaBoton = File().load(plantillaIn + 'boton.template')
-    botones = ''
-    uiId = 1  # Identif. de elemento gráfico
-    for tabla in metadatos.tablas:
-        boton = plantillaBoton.replace('%%ID%%', str(uiId))
-        uiId += 1
-        botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
-        print(f'-> {tabla.nombre}')
-    # FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
-    ventanaMain = File().load(plantillaIn + indexFile).replace('%%BOTONES%%', botones)
-    ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
-    ventanaMain = ventanaMain.replace('%%UI_TYPE%%', tipoSalida)
-    ventanaMain = ventanaMain.replace('%%TIPO_DB%%', variablesDeEntorno['TIPO_DB'])
-    logging.debug(ventanaMain)
-    File().save(plantillaOut + indexFile, ventanaMain)
-
-    # TODO: Páginas individuales por tabla
-    plantillaTabla = File().load(plantillaIn + 'tabla.' + tipoSalida)
-    for tabla in metadatos.tablas:
-        #"mysql:host=$host;dbname=$db;charset=utf8mb4",
-        #$user,
-        #$pass,
-        #[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        pdoType = db.comandosSQL['pdo_type'].replace("%%DB%%", db.name)
-        contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
-        contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', tipoSalida)
-        contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', variablesDeEntorno['TIPO_DB'])
-        contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
-        # Columnas
-        nombresDeCampos = ''
-        bindCampos = ''
-        postCampos = ''
-        formCreateCampos = ''
-        readColumns = ''
-        readDatos = ''
-        columnaPK = None
-        updateBindCampos = ''
-        updatePostCampos = ''
-
-        for columna in tabla.columnas:
-            nombre = columna.COLUMN_NAME
-            # Form
-            dataType = db.convertDataType(columna.DATA_TYPE)
-            required = 'required' if columna.IS_NULLABLE.upper() == 'NO' else ''
-
-            # Create
-            nombresDeCampos += nombre + ', '
-            bindCampos += '?, '
-            postCampos += f'\t$_POST["{nombre}"],\n'
-            formCreateCampos += f'<div class="mb-3">\t<label class="form-label">{nombre.upper()}</label>\n<input type="{dataType}" name="{nombre}" class="form-control" {required} /></div>\n'
-
-            # Read
-            readColumns += f'\t<th>{nombre.capitalize()}</th>\n'
-            readDatos += f'\t<td><?= htmlspecialchars($fila["{nombre}"]) ?></td>\n'
-
-            # Update
-            if columna.COLUMN_KEY == 'PRI':
-                columnaPK = columna.COLUMN_NAME
-                logging.debug(f'Columna PK detectada: {columnaPK}')
-            else:
-                updateBindCampos += f'{nombre} = ?, '
-                updatePostCampos += f'\t\t$_POST["{nombre}"],\n'
-
-        updateBindCampos = updateBindCampos[:-2] + f'\n\t\tWHERE {columnaPK} = ? ;'
-        updatePostCampos += f'\t\t$_POST["{columnaPK}"]'
-
-        # quitamos última coma y espacio
-        nombresDeCampos = nombresDeCampos[:-2]
-        bindCampos = bindCampos[:-2]
-        postCampos = postCampos[:-2]
-
-        contenidoTabla = contenidoTabla.replace('%%NOMBRES_DE_CAMPOS%%', nombresDeCampos)
-        contenidoTabla = contenidoTabla.replace('%%BIND_CAMPOS%%', bindCampos)
-        contenidoTabla = contenidoTabla.replace('%%POST_CAMPOS%%', postCampos)
-        contenidoTabla = contenidoTabla.replace('%%FORM_CREATE_CAMPOS%%', formCreateCampos)
-        contenidoTabla = contenidoTabla.replace('%%READ_COLUMNS%%', readColumns)
-        contenidoTabla = contenidoTabla.replace('%%READ_DATOS%%', readDatos)
-        contenidoTabla = contenidoTabla.replace('%%UPDATE_BIND_CAMPOS%%', updateBindCampos)
-        contenidoTabla = contenidoTabla.replace('%%POST_UPDATE_CAMPOS%%', updatePostCampos)
-        contenidoTabla = contenidoTabla.replace('%%CAMPO_KEY%%', columnaPK)
-
-        columnasDef = f'// Tabla: {tabla.nombre}\n'
-        for columna in tabla.columnas:
-            columnasDef += f'//  + {columna.COLUMN_NAME} : {columna.DATA_TYPE}\n'
-        contenidoTabla = contenidoTabla.replace('%%COLUMNAS_DEF%%', columnasDef)
-        # Guardado
-        File().save(plantillaOut + f'tabla_{tabla.nombre}.' + tipoSalida, contenidoTabla)
-
-    # PDTE: Gestión de errores de consultas: insert, update, delete
-
-    # Exportación para obtener una definición exacta
-    # DONE: + mariaDB: env $(cat .env | xargs)  bash -c ' docker exec -i mariaDB mysqldump -u"$user" -p"$pass" "$db" > dump-$db.sql'
-    # DONE: + sqlite: script bash
-    if tipoSalida == 'php':
-        utils.printInfo(f'Aplicación funcionando en http://localhost:{variablesDeEntorno["WWW_PORT"]}')
-        varEnv = f'''HOST={variablesDeEntorno["SERVER_DB"]}
-DB={variablesDeEntorno["DOCKER_DB"]}
-USER={variablesDeEntorno["USER_DB"]}
-PASS={variablesDeEntorno["PASS_DB"]}
-TIPO_DB={tipoDB}
-'''
-        File().save(plantillaOut + '.env', varEnv)
-        import shutil
-        shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
-        shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
-        import os #, stat
-        os.chmod(settings.TAREA_PATH + variablesDeEntorno['NAME_DB'], 0o777)
-    pass
 
 # ----------------------------------------------------------------------
 # Funciones auxiliares
@@ -304,6 +212,20 @@ def generacionDeMetadatos(db):
     logging.debug('Metadatos capturados:\n' + metadatos.str())
     # print(metadatos.str())
     return metadatos
+
+
+def getDriverSalida(tipoSalida):
+    # DONE: 11. Importacion de driver salida según tipo (DAO)
+    match tipoSalida:
+        case 'php':
+            from libs import phpSalida as salida
+        case 'python':
+            from libs import pythonSalida as salida
+        case _:
+            utils.printError(f'Gestor de BBDD {tipoSalida} no disponible', settings.EXIT['FORMAT_ERROR'])
+
+    salida.settings = settings  # Cargamos las variables globales en el driver que corresponda
+    return salida
 
 
 # Autocargador de programa externo
