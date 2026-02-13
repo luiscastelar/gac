@@ -25,7 +25,10 @@ def main():
     logging = initGlobalSettings()
 
     # DONE: 2. Carga del archivo de entrada (DDL)
-    sql, tipoDB = loadDDL()
+    # - vacio o 0 para preguntar por consola
+    # - 1 para cargar dump-gac2.sql
+    # - 2 para cargar db-sqlite.sql
+    sql, tipoDB = loadDDL(1)
 
     # DONE: 3. Carga de variables de entorno comunes a todos los tipos de salida
     variablesDeEntorno = loadEnvironmentVar(tipoDB)
@@ -93,21 +96,21 @@ def initGlobalSettings():
     return logging
 
 
-def loadDDL():
+def loadDDL(tipo=0):
     # DONE: 2. Captura DDL de entrada
     txt = '''Archivos de muestra preparados:
-  - dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y
-    matrículas (MariaDB)
-  - db-sqlite.sql: DDL de ejemplo con tablas de albums, artists y
-    tracks (SQLite)
+  - ejemplos/dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y matrículas (MariaDB)
+  - ejemplos/db-sqlite.sql: DDL de ejemplo con tablas de albums, artists y tracks (SQLite)
 '''
     print(txt)
-    # file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
-    file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
-    #file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
+    match tipo:
+        case 0:
+            file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
+        case 1:
+            file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
+        case 2:
+            file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
     sql = File().load(file)
-    # sql = File().load('')
-    # print(f'Archivo sql:\n{sql}')
     if len(sql) > 0:
         print(f'1. Archivo {file} cargado correctamente.')
     else:
