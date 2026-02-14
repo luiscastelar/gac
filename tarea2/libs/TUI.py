@@ -79,7 +79,7 @@ def operacionesDeImportacion()->int:
     else:
         return error
 
-def eleccionDeSalida()-> tuple[str, str]:
+def eleccionDeSalida(tipo)-> tuple[str, str]:
     txt = ''''
         Seleccione el formato de salida:
         1. Python (CRUD)
@@ -87,10 +87,17 @@ def eleccionDeSalida()-> tuple[str, str]:
         3. Java (JSP)  -- TODO
         0. Otro
         '''
-    elec = int( input(txt))
+    match tipo:
+        case 0:
+            elec = int( input(txt))
+        case 1:
+            elec = 1
+        case 2:
+            elec = 2
+    
     match elec:
         case 1:
-            return 'python', 'CRUD.py'
+            return 'python', 'crud.py'
         case 2:
             return 'php', 'index.php'
         case 3:
@@ -100,3 +107,4 @@ def eleccionDeSalida()-> tuple[str, str]:
             settings.logging.error(msg)
             print(msg)
             quit(1)
+    settings.logging.debug(f'Elección de salida: {elec}')

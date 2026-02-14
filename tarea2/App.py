@@ -23,6 +23,7 @@ def main():
     
     # DONE: 1. Iniciazilación de variables globales
     logging = initGlobalSettings()
+    logging.info('0. Inicio del programa')
 
     # DONE: 2. Carga del archivo de entrada (DDL)
     # - vacio o 0 para preguntar por consola
@@ -50,9 +51,10 @@ def main():
     metadatos = generacionDeMetadatos(db)
 
     # DONE: 9. Eleccion de salida
-    #tipoSalida, indexFile = TUI.eleccionDeSalida()
-    tipoSalida, indexFile = 'php', 'index.php'
-    #tipoSalida, indexFile = 'python', 'crud.py'
+    # - vacio o 0 para preguntar por consola
+    # - 1 para salida python
+    # - 2 para salida php
+    tipoSalida, indexFile = TUI.eleccionDeSalida(1)
     variablesDeEntorno.update({
         'tipoSalida': tipoSalida,
         'indexFile': indexFile
@@ -127,7 +129,7 @@ def loadDDL(tipo=0):
 
     # DONE: Intentar inferencia de tipo de BBDD (mariadb, sqlite, oracledb,...)
     tipoDB = TUI.getTipoDB(sql)
-    logging.debug(f'Tipo de bbdd: {tipoDB}')
+    logging.info(f'Tipo de bbdd: {tipoDB}')
 
     return sql, tipoDB
 

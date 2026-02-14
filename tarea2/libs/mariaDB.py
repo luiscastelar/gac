@@ -27,7 +27,7 @@ def dropDB(conexion, db):
         printInfo(f"Base de datos '{db}' eliminada (si existía).")
 
     except mysql.connector.Error as err:
-        print(f"Error al eliminar la base de datos '{db}': {err}")
+        printError(f"Error al eliminar la base de datos '{db}': {err}")
 
     finally:
         if cursor:
@@ -52,7 +52,7 @@ def createDB(conexion, db):
         printInfo(f"Base de datos '{db}' creada o ya existente.")
         return conexion
     except mysql.connector.Error as err:
-        print(f"Error al crear la base de datos '{db}': {err}")
+        printError(f"Error al crear la base de datos '{db}': {err}")
 
     finally:
         if cursor:
@@ -89,7 +89,7 @@ def loadFromSQL(conn, db, sql):
 
     except mysql.connector.Error as err:
         conn.rollback()
-        print(f"Error ejecutando el script SQL: {err}")
+        printError(f"Error ejecutando el script SQL: {err}")
         raise
 
     finally:
@@ -102,7 +102,7 @@ def read(conn, sql):
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(sql)
-        printInfo(f'Lectura {sql} correcta')
+        settings.logging.debug(f'Lectura {sql} correcta')
         return cursor.fetchall()
     finally:
         cursor.close()
@@ -141,3 +141,12 @@ def printInfo(msg):
     """
     settings.logging.info(msg)
     print(msg)
+
+def printError(msg):
+    """
+    Docstring para printError
+    
+    :param msg: texto
+    """
+    settings.logging.error(msg)
+    print(f'ERROR: {msg}')

@@ -7,7 +7,7 @@ import logging
 TAREA_PATH = os.path.dirname(__file__) + '/'
 realPathDB = ''
 
-LOGGING = logging.DEBUG       # modo de depuración
+LOGGING = logging.INFO       # modo de depuración
 
 FILE_LOGGIN = TAREA_PATH + 'app.log'
 ENV='.env'
@@ -102,6 +102,12 @@ exitCode = {
 #  - DEBUG, INFO, WARNING, ERROR, CRITICAL
 # ---------------------------------------------------------------------
 def initLoggin():
+    logging.basicConfig(filename = FILE_LOGGIN,
+                            filemode = 'a',
+                            level = LOGGING,
+                            format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s''')
+    return logging
+
     if LOGGING == logging.INFO:
         logging.basicConfig(level = LOGGING,
                             format='%(message)s')
