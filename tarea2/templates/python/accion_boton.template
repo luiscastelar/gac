@@ -1,0 +1,4 @@
+    def %%TEXTO%%(self):
+        import tabla_%%TEXTO%%
+        tabla_%%TEXTO%%.create_%%TEXTO%%_widgets(self)
+

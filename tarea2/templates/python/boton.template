@@ -1,20 +1,2 @@
-def abrir_ventana_hija_%%ID%%(objeto%%ID%%):
-    ventana_hija = Toplevel(ventana_principal)
-    ventana_hija.title(title)
-    ventana_hija.geometry("250x150")
-    
-    etiqueta = tk.Label(ventana_hija, text=label, font=("Arial", 12))
-    etiqueta.pack(pady=10)
-
-    etiqueta = tk.Label(ventana_hija, text=table, font=("Arial", 12))
-    etiqueta.pack(pady=10)
-    
-    boton_cerrar = tk.Button(ventana_hija, text="Cerrar", command=ventana_hija.destroy)
-    boton_cerrar.pack(pady=10)
-
-label = f'Ventana {str(%%ID%%)}'
-table = '%%TEXTO%%'
-title = 'Ventana %%TEXTO%%'
-objeto_%%ID%% = label, table, title
-boton_abrir_%%ID%% = tk.Button(ventana_principal, text="%%TEXTO%%", command=partial(abrir_ventana_hija_%%ID%%, objeto_%%ID%%))
-boton_abrir_%%ID%%.pack(pady=20)
+        self.%%TEXTO%%_button = tk.Button(self.root, text="%%TEXTO%%", command=self.%%TEXTO%%)
+        self.%%TEXTO%%_button.grid(row=%%ID%%, column=0)
