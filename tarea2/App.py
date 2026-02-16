@@ -153,9 +153,9 @@ def getDriverDB(tipoDB):
     # DONE: 4. Importacion de driver db según tipo (DAO)
     match tipoDB:
         case 'mariadb':
-            from libs import mariaDB as db
+            from libs import dbMariadb as db
         case 'sqlite':
-            from libs import sqliteDB as db
+            from libs import dbSqlite as db
         case 'oracle-xe':
             from libs import oracleDB as db
         case _:
