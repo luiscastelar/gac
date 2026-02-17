@@ -6,9 +6,6 @@ from libs.contentOfFile import File
 import libs.TUI as TUI
 import libs.utils as utils
 import settings
-from libs.baseDatos import BaseDatos
-from libs.tabla import Tabla
-from libs.columna import Columna
 import libs.dbComun as dbComun
 
 # ---------------------------------------------------------------------
@@ -43,6 +40,16 @@ def main():
 
     # DONE: 6. Import en db pruebas
     db.conn = dbComun.getConexionDB(db, variablesDeEntorno)
+    
+    ope = TUI.operacionesDeImportacion()
+    if ope <= 0:
+        utils.printError(f'Operación {ope} sobre db no disponible', 1)
+    if ope == 1:
+        db.dropDB(db.conn, variablesDeEntorno['NAME_DB'])
+    if ope <= 2:
+        db.conn = db.createDB(db.conn, variablesDeEntorno['NAME_DB'])
+    if ope <= 3:
+        pass
 
     # DONE: 7. Importar datos
     db.name = variablesDeEntorno['NAME_DB']
@@ -55,7 +62,7 @@ def main():
     # - vacio o 0 para preguntar por consola
     # - 1 para salida python
     # - 2 para salida php
-    tipoSalida, indexFile = TUI.eleccionDeSalida(2)
+    tipoSalida, indexFile = TUI.eleccionDeSalida(1)
     variablesDeEntorno.update({
         'tipoSalida': tipoSalida,
         'indexFile': indexFile

@@ -32,16 +32,6 @@ def getConexionDB(db, variablesDeEntorno):
     dbName = variablesDeEntorno['NAME_DB']
     password = variablesDeEntorno['PASS_DB']
     conn = db.getConn(host, port, user, password)
-    
-    ope = TUI.operacionesDeImportacion()
-    if ope <= 0:
-        utils.printError(f'Operación {ope} sobre db no disponible', 1)
-    if ope == 1:
-        db.dropDB(conn, dbName)
-    if ope <= 2:
-        conn = db.createDB(conn, dbName)
-    if ope <= 3:
-        pass
     return conn
 
 
