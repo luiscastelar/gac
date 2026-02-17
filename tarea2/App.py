@@ -27,11 +27,11 @@ def main():
     # - vacio o 0 para preguntar por consola
     # - 1 para cargar dump-gac2.sql
     # - 2 para cargar db-sqlite.sql
-    sql, tipoDB = loadDDL(1)
+    sql, tipoDB = loadDDL(2)
 
     # DONE: 3. Carga de variables de entorno comunes a todos los tipos de salida
     variablesDeEntorno = loadEnvironmentVar(tipoDB)
-
+    
     # DONE: 4. Carga driver
     db = dbComun.getDriverDB(tipoDB)
 
@@ -39,21 +39,20 @@ def main():
     db.comandosSQL = Env.get(settings.TAREA_PATH + 'templates/' + tipoDB + '/sql')
 
     # DONE: 6. Import en db pruebas
-    db.conn = dbComun.getConexionDB(db, variablesDeEntorno)
+    dbComun.getConexionDB(db, variablesDeEntorno)
     
     ope = TUI.operacionesDeImportacion()
     if ope <= 0:
         utils.printError(f'Operación {ope} sobre db no disponible', 1)
     if ope == 1:
-        db.dropDB(db.conn, variablesDeEntorno['NAME_DB'])
+        db.dropDB()
     if ope <= 2:
-        db.conn = db.createDB(db.conn, variablesDeEntorno['NAME_DB'])
+        db.createDB(variablesDeEntorno['NAME_DB'])
     if ope <= 3:
         pass
 
     # DONE: 7. Importar datos
-    db.name = variablesDeEntorno['NAME_DB']
-    db.loadFromSQL(db.conn, db.name, sql)
+    db.loadFromSQL(sql)
 
     # DONE: 8. Generación de metadatos
     metadatos = dbComun.generacionDeMetadatos(db)
@@ -62,7 +61,7 @@ def main():
     # - vacio o 0 para preguntar por consola
     # - 1 para salida python
     # - 2 para salida php
-    tipoSalida, indexFile = TUI.eleccionDeSalida(1)
+    tipoSalida, indexFile = TUI.eleccionDeSalida(2)
     variablesDeEntorno.update({
         'tipoSalida': tipoSalida,
         'indexFile': indexFile
@@ -81,7 +80,7 @@ def main():
     out.settings = settings
     out.logging = logging
 
-    # TODO: 12. Generar indice de tablas
+    # DONE: 12. Generar indice de tablas
     out.generarIndex(metadatos, variablesDeEntorno)
 
     # TODO: 13. Generar CRUDs individuales por tabla

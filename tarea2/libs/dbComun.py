@@ -12,15 +12,16 @@ def getDriverDB(tipoDB):
     # DONE: 4. Importacion de driver db según tipo (DAO)
     match tipoDB:
         case 'mariadb':
-            from libs import dbMariadb as db
+            from .dbMariadb import DbMariadb as db
         case 'sqlite':
-            from libs import dbSqlite as db
+            from .dbSqlite import DbSqlite as db
         case 'oracle-xe':
-            from libs import oracleDB as db
+            #from libs import oracleDB as db
+            pass
         case _:
             utils.printError(f'Gestor de BBDD {tipoDB} no disponible', settings.EXIT['FORMAT_ERROR'])
-
-    db.settings = settings  # Cargamos las variables globales en el driver que corresponda
+    db = db(settings.logging)  # Instanciamos el driver de la base de datos
+    #db.settings = settings  # Cargamos las variables globales en el driver que corresponda
     return db
 
 
@@ -31,7 +32,17 @@ def getConexionDB(db, variablesDeEntorno):
     user = variablesDeEntorno['USER_DB']
     dbName = variablesDeEntorno['NAME_DB']
     password = variablesDeEntorno['PASS_DB']
-    conn = db.getConn(host, port, user, password)
+    try:
+        conn = db.getConn(host, port, user, password, dbName)
+    
+    except Exception as e:
+        print(f'Error al conectar a la base de datos: {e}')
+        try:
+            conn = db.getConn(host, port, user, password, None)
+        except Exception as e:
+            print(f'Error al conectar a la base de datos sin especificar el nombre: {e}')
+            return None
+    
     return conn
 
 
@@ -47,11 +58,11 @@ def generacionDeMetadatos(db):
     tablas = []
     # Lista de columnas
     atributos = ['TABLE_NAME', 'COLUMN_NAME', 'ORDINAL_POSITION', 'COLUMN_DEFAULT', 'IS_NULLABLE', 'DATA_TYPE', 'CHARACTER_MAXIMUM_LENGTH', 'NUMERIC_PRECISION', 'COLUMN_TYPE', 'COLUMN_KEY', 'COLUMN_COMMENT']
-    for tab in db.readSimpleList(db.conn, sql):
+    for tab in db.readSimpleList(sql):
         nombreTabla = tab[0]
         # Captura de columnas
         sql = comandosSQL['show_columns'].replace('%%TABLA%%', nombreTabla)
-        columnas = db.readSimpleList(db.conn, sql)
+        columnas = db.readSimpleList(sql)
         tabla = Tabla(nombreTabla)
         for col in columnas:
             columnaNombre = col[1]

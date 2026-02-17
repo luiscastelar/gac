@@ -1,152 +1,188 @@
+from .dbTipo import DbTipo
 import mysql.connector
 
-settings = None
-dbName = None
-comandosSQL = None
-conn = None
-
-def getConn(host, port, user, password):
-    "Estandarizamos la conexión a bbdd"
-    if (host == 'mariadb'):
-        host = 'localhost'
-    conn = mysql.connector.connect(host=host, port=port, user=user, password=password)
-    return conn
-
-def dropDB(conexion, db):    
-    """
-    Elimina una base de datos si existe.
-
-    :param conexion: conexión activa a MySQL
-    :param db: nombre de la base de datos
-    """
-    cursor = None
-    try:
-        cursor = conexion.cursor()
-        cursor.execute(f"DROP DATABASE IF EXISTS `{db}`;")
-        conexion.commit()
-        printInfo(f"Base de datos '{db}' eliminada (si existía).")
-
-    except mysql.connector.Error as err:
-        printError(f"Error al eliminar la base de datos '{db}': {err}")
-
-    finally:
-        if cursor:
-            cursor.close()
-
-def createDB(conexion, db):
-    """
-    Crea una base de datos si no existe.
-
-    :param conexion: conexión activa a MySQL
-    :param db: nombre de la base de datos
-    """
-    cursor = None
-    try:
-        cursor = conexion.cursor()
-        cursor.execute(
-            f"CREATE DATABASE IF NOT EXISTS `{db}` "
-            "CHARACTER SET utf8mb4 "
-            "COLLATE utf8mb4_unicode_ci;"
-        )
-        conexion.commit()
-        printInfo(f"Base de datos '{db}' creada o ya existente.")
-        return conexion
-    except mysql.connector.Error as err:
-        printError(f"Error al crear la base de datos '{db}': {err}")
-
-    finally:
-        if cursor:
-            cursor.close()
-
-def loadFromSQL(conn, db, sql):
-    """
-    Ejecuta un fichero SQL completo (DDL + DML) sobre una conexión MySQL.
-
-    :param conn: conexión activa mysql.connector
-    :param sql: contenido del fichero sql
-    """
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(f'USE {db};')
-        statement = ""
-        for line in sql.splitlines():
-            line = line.strip()
-
-            # Ignorar comentarios y líneas vacías
-            if not line or line.startswith("--") or line.startswith("/*"):
-                continue
-
-            statement += line + " "
-
-            # Fin de sentencia
-            if line.endswith(";"):
-                cursor.execute(statement)
-                statement = ""
-
-        conn.commit()
-        printInfo(f"Script sql ejecutado correctamente.")
-
-    except mysql.connector.Error as err:
-        conn.rollback()
-        printError(f"Error ejecutando el script SQL: {err}")
-        raise
-
-    finally:
-        cursor.close()
-
-def read(conn, sql):
-    """
-    Devuelve todas las filas
-    """
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute(sql)
-        settings.logging.debug(f'Lectura {sql} correcta')
-        return cursor.fetchall()
-    finally:
-        cursor.close()
+class DbMariadb(DbTipo):
+    def __init__(self, logging=None):
+        super().__init__(logging)
 
 
-def readSimpleList(conn, sql):
-    lista = read(conn, sql)
-    simpleList = []
-    for ele in lista:
-        simpleList.append(dictToList(ele))
-    return simpleList
+    def getConn(self, host='localhost', port=None, user=None, password=None, dbName=None):
+        "Estandarizamos la conexión a bbdd"
+        if (host == 'mariadb'):
+            host = 'localhost'
+        self.conn = mysql.connector.connect(host=host, port=port, user=user, password=password, database=dbName)
+        self.name = dbName
+        return self.conn
 
 
-def dictToList(ele):
-    lista = []
-    for k, v in ele.items():
-        lista.append(v)
-    return lista
+    def dropDB(self):    
+        """
+        Elimina una base de datos si existe.
+
+        :return: False si no se ha podido eliminar la base de datos, True si se ha eliminado correctamente
+        """
+        cursor = None
+        error = False
+        try:
+            dbName = self.conn.database
+            cursor = self.conn.cursor()
+            cursor.execute(f"DROP DATABASE IF EXISTS `{dbName}`;")
+            self.conn.commit()
+            self.printInfo(f"Base de datos '{dbName}' eliminada (si existía).")
+
+        except mysql.connector.Error as err:
+            self.printError(f"Error al eliminar la base de datos '{dbName}': {err}")
+            error = True
+
+        finally:
+            if cursor:
+                cursor.close()
+
+        return True if not error else False
 
 
-def convertDataType(tipo:str )->str:
-    match(tipo):
-        case 'int':
-            return 'number'
-        case 'varchar':
-            return 'text'
-        case _:
-            return 'text'
+
+    def createDB(self, dbName):
+        """
+        Crea una base de datos si no existe.
         
+        :param dbName: nombre de la base de datos
+        :return: La conexión actual
+        """
+        cursor = None
+        error = False
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"CREATE DATABASE IF NOT EXISTS `{dbName}` "
+                "CHARACTER SET utf8mb4 "
+                "COLLATE utf8mb4_unicode_ci;"
+            )
+            self.conn.commit()
+            self.printInfo(f"Base de datos '{dbName}' creada o ya existente.")
+                    
+        except mysql.connector.Error as err:
+            self.printError(f"Error al crear la base de datos '{dbName}': {err}")
+            error = True
 
-def printInfo(msg):
-    """
-    Docstring para printInfo
-    
-    :param msg: texto
-    """
-    settings.logging.info(msg)
-    print(msg)
+        finally:
+            if cursor:
+                cursor.close()
+        
+        # ¿La db es diferente?
+        actual = self.conn.database
+        if actual != dbName:
+            self.printInfo(f"Cambiando a la base de datos '{dbName}'...")
+            newConn = mysql.connector.connect(host=self.conn._host, port=self.conn._port, user=self.conn._user, password=self.conn._password, database=dbName)
+            self.conn.close()  # Cerramos la conexión anterior
+            self.conn = newConn
+            self.name = dbName
+        else:
+            newConn = self.conn
 
-def printError(msg):
-    """
-    Docstring para printError
+        return newConn if not error else None
     
-    :param msg: texto
-    """
-    settings.logging.error(msg)
-    print(f'ERROR: {msg}')
+
+    def loadFromSQL(self, sql):
+        """
+        Ejecuta un fichero SQL completo (DDL + DML) sobre una conexión MySQL.
+
+        :param sql: contenido del fichero sql
+        :return: False si no se ha podido ejecutar el script SQL, True si se ha ejecutado correctamente
+        """
+        cursor = self.conn.cursor()
+        error = False
+        try:
+            #cursor.execute(f'USE {db};')
+            statement = ""
+            for line in sql.splitlines():
+                line = line.strip()
+
+                # Ignorar comentarios y líneas vacías
+                if not line or line.startswith("--") or line.startswith("/*"):
+                    continue
+
+                statement += line + " "
+
+                # Fin de sentencia
+                if line.endswith(";"):
+                    cursor.execute(statement)
+                    statement = ""
+
+            self.conn.commit()
+            self.printInfo(f"Script sql ejecutado correctamente.")
+
+        except mysql.connector.Error as err:
+            self.conn.rollback()
+            self.printError(f"Error ejecutando el script SQL: {err}")
+            error = True
+
+        finally:
+            cursor.close()
+        
+        if error:
+            raise Exception("Error ejecutando el script SQL")
+        else:
+            return True
+
+
+    def readSimpleList(self, sql:str )->list[list[str]]:
+        """
+        Select ... -> lista (filas) de listas (columnas)
+        
+        :param sql: consulta SQL a ejecutar
+        :type sql: str
+        :return: lista de listas con los resultados de la consulta SQL
+        :rtype: list[list[str]]
+        """
+        lista = self.read(sql)
+        simpleList = []
+        for ele in lista:
+            simpleList.append(self.dictToList(ele))
+        return simpleList
+
+
+    def convertDataType(self, tipo:str )->str:
+        """
+        Convierte un tipo de dato SQL a un tipo de dato Python.
+        
+        :param tipo: tipo en SQL a convertir
+        :type tipo: str
+        :return: tipo de dato en Python equivalente al tipo de dato SQL proporcionado
+        :rtype: str
+        """
+        match(tipo):
+            case 'int':
+                return 'number'
+            case 'varchar':
+                return 'text'
+            case _:
+                return 'text'
+            
+
+    def read(self, sql):
+        """
+        Devuelve todas las filas
+        """
+        cursor = self.conn.cursor(buffered=True, dictionary=True)
+        filasLeidas = []
+        try:
+            cursor.execute(sql)
+            self.logging.debug(f'Lectura {sql} correcta')
+            filasLeidas = cursor.fetchall()
+        finally:
+            cursor.close()
+        return filasLeidas
+
+
+    def dictToList(self, ele):
+        """
+        De un diccionario, devuelve una lista con los valores del diccionario (sin las claves).
+        
+        :param ele: elemento a convertir
+        """
+        lista = []
+        #for k, v in ele.items():
+        for v in ele.values():
+            lista.append(v)
+        return lista

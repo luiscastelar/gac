@@ -12,8 +12,8 @@ def generarIndex(metadatos, env)-> None:
     param metadatos: metadatos de la base de datos
     param env: variables de entorno con configuración de db y salida
     """
-    printInfo(f'Variables entorno en {__file__}: {env}')
-    # TODO: Posible pagina índice de tablas
+    logging.debug(f'Variables entorno en {__file__}: {env}')
+    # DONE: Posible pagina índice de tablas
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     plantillaBoton = File().load(plantillaIn + 'boton.template')
@@ -26,7 +26,6 @@ def generarIndex(metadatos, env)-> None:
         uiId += 1
         botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
-    # FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
     ventanaMain = File().load(plantillaIn + env['indexFile']).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
     ventanaMain = ventanaMain.replace('%%UI_TYPE%%', env['tipoSalida'])
