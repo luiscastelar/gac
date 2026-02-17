@@ -1,7 +1,7 @@
 from .contentOfFile import File
 from .utils import printInfo
 import shutil
-import json
+from os import mkdir
 
 settings = None
 logging = None
@@ -55,13 +55,27 @@ def generarCRUD(tabla, db, env)-> None:
     DB = env["DOCKER_DB"]
     USER = env["USER_DB"]
     PASS = env["PASS_DB"]
-    TIPO_DB = env["TIPO_DB"]
-    
+    TIPO_DB = env["TIPO_DB"]    
+
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
 
-    # Importo el driver adecuado a la bbdd
-    copy(f'libs/db{TIPO_DB.capitalize()}.py',plantillaOut+'db.py')
+    # Importo el driver db y librerías creadas
+    try:
+        mkdir(plantillaOut+ 'libs/')
+    except:
+        pass
+    try:
+        mkdir(plantillaOut+'templates/')
+    except:
+        pass
+    
+    copy(f'libs/db{TIPO_DB.capitalize()}.py',plantillaOut+'libs/db.py')
+    copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
+    filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py']
+    [ copy(f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
+    
+
     plantillaTabla = File().load(plantillaIn + 'table.py')
     #"mysql:host=$host;dbname=$db;charset=utf8mb4",
     #$user,
@@ -73,6 +87,7 @@ def generarCRUD(tabla, db, env)-> None:
     contenidoTabla = contenidoTabla.replace('%%HOST%%', HOST)
     contenidoTabla = contenidoTabla.replace('%%USER%%', USER)
     contenidoTabla = contenidoTabla.replace('%%PASS%%', PASS)
+    contenidoTabla = contenidoTabla.replace('%%PORT_DB%%', env['PORT_DB'])
     #contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', env['tipoSalida'])
     contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', env['TIPO_DB'])
     contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
