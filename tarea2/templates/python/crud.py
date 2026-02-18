@@ -22,7 +22,7 @@ class CRUD:
 
         titulo = ttk.Label(
             self.main_frame,
-            text="Panel principal",
+            text="Panel principal (DB: %%TIPO_DB%% ➡️ UI: %%UI_TYPE%%)",
             font=("Segoe UI", 14, "bold")
         )
         titulo.grid(row=0, column=0, pady=(0, 15))
