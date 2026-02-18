@@ -37,6 +37,9 @@ def generarIndex(metadatos, env)-> None:
     ventanaMain = File().load(plantillaIn + env['indexFile']).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
     ventanaMain = ventanaMain.replace('%%ACCIONES_DE_BOTONES%%', acciones)
+    # DB: %%TIPO_DB%% ➡️ UI: %%UI_TYPE%%
+    ventanaMain = ventanaMain.replace('%%UI_TYPE%%', env['tipoSalida'])
+    ventanaMain = ventanaMain.replace('%%TIPO_DB%%', env['TIPO_DB'])
     logging.debug(ventanaMain)
     File().save(plantillaOut + env['indexFile'], ventanaMain)
 
