@@ -80,6 +80,20 @@ class DbTipo:
         """
         simpleList = []        
         return simpleList
+    
+
+    def execute(self, sql, valores: tuple)->int:
+        """
+        Es la ejecución de una consulta preparada.
+        
+        :param self: el objeto db
+        :param sql: la SENTENCIA
+        :param valores: los valores
+        :type valores: tupla
+        :return: las filas afectadas o -1 si error
+        :rtype: entero
+        """
+        return False
 
 
     def convertDataType(self, tipo:str )->str:

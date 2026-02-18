@@ -140,6 +140,41 @@ class DbMariadb(DbTipo):
         for ele in lista:
             simpleList.append(self.dictToList(ele))
         return simpleList
+    
+
+    def execute(self, sql, valores: tuple)->int:
+        """
+        Es la ejecución de una consulta preparada.
+        
+        :param self: el objeto db
+        :param sql: la SENTENCIA
+        :param valores: los valores
+        :type valores: tupla
+        :return: las filas afectadas o -1 si error
+        :rtype: entero
+        """
+        cursor = self.conn.cursor()
+        afactadas =  0
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(sql, valores)            
+            self.conn.commit()           
+            afectadas = cursor.rowcount
+                    
+        except mysql.connector.Error as err:
+            self.printError(f"Error en la inserción sobre '{self.conn.database}': {err}")
+            afectadas = -1
+
+        finally:
+            if cursor:
+                cursor.close()
+                
+        if afectadas > 0:
+            self.printInfo(f"Insertados/Actualizados/Borrados {afectadas} registros sobre {self.conn.database}.")
+        elif afectadas == 0:
+            self.printInfo(f"Ninguna fila afectada con la consulta '{sql}'.")
+        else:
+            self.printError(f"Ocurrió un error")
 
 
     def convertDataType(self, tipo:str )->str:
