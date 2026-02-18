@@ -1,2 +1,2 @@
-        self.%%TEXTO%%_button = tk.Button(self.root, text="%%TEXTO%%", command=self.%%TEXTO%%)
+        self.%%TEXTO%%_button = ttk.Button(self.root, text="%%TEXTO%%", command=self.%%TEXTO%%)
         self.%%TEXTO%%_button.grid(row=%%ID%%, column=0)
