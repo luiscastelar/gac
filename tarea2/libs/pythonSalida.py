@@ -17,6 +17,7 @@ def generarIndex(metadatos, env)-> None:
     param env: variables de entorno con configuración de db y salida
     """
     settings.logging.debug(f'Variables entorno en {__file__}: {env}')
+
     # DONE: Posible pagina índice de tablas
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
@@ -24,15 +25,10 @@ def generarIndex(metadatos, env)-> None:
     plantillaAccionBoton = File().load(plantillaIn + 'accion_boton.template')
     alturaVentana = len(metadatos.tablas) * 50 + 50  # altura variable
 
-    # Por si queremos hacer un main aparte:
-    # copy(plantillaIn + 'main.py', plantillaOut + 'main.py')
-
     botones = ''
     acciones = ''
-    uiId = 1  # Identif. de elemento gráfico
-    for tabla in metadatos.tablas:
-        boton = plantillaBoton.replace('%%ID%%', str(uiId))
-        uiId += 1
+    for i, tabla in enumerate(metadatos.tablas):
+        boton = plantillaBoton.replace('%%FILA%%', str(i+1))  # dejamos el hueco para el mensaje superior
         botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
 
@@ -40,8 +36,6 @@ def generarIndex(metadatos, env)-> None:
 
     ventanaMain = File().load(plantillaIn + env['indexFile']).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
-    #ventanaMain = ventanaMain.replace('%%UI_TYPE%%', env['tipoSalida'])
-    #ventanaMain = ventanaMain.replace('%%TIPO_DB%%', env['TIPO_DB'])
     ventanaMain = ventanaMain.replace('%%ACCIONES_DE_BOTONES%%', acciones)
     logging.debug(ventanaMain)
     File().save(plantillaOut + env['indexFile'], ventanaMain)
@@ -72,20 +66,16 @@ def generarCRUD(tabla, db, env)-> None:
     
     copy(f'libs/db{TIPO_DB.capitalize()}.py',plantillaOut+'libs/db.py')
     copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
-    #from os import listdir
-    #print(f'Archivos en plantilla libs: {listdir("libs/")}')
+
     filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py', 'dbTipo.py']
     [ copy(f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
     
     plantillaTabla = File().load(plantillaIn + 'table.py')
-    #pdoType = db.comandosSQL['pdo_type'].replace("%%DB%%", db.name)
-    #contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
     contenidoTabla = plantillaTabla.replace('%%DB%%', db.name)
     contenidoTabla = contenidoTabla.replace('%%HOST%%', HOST)
     contenidoTabla = contenidoTabla.replace('%%USER%%', USER)
     contenidoTabla = contenidoTabla.replace('%%PASS%%', PASS)
     contenidoTabla = contenidoTabla.replace('%%PORT_DB%%', env['PORT_DB'])
-    #contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', env['tipoSalida'])
     contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', env['TIPO_DB'])
     contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
 
@@ -162,19 +152,3 @@ def buildApp(env):
     salida = plantillaOut + 'crud.py'
     printInfo(f"Lanzar aplicación con 'py {salida}'")
     return None
-
-    plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
-    plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
-    if env['tipoSalida'] == 'python':       
-        varEnv = f'''HOST={env["SERVER_DB"]}
-DB={env["DOCKER_DB"]}
-USER={env["USER_DB"]}
-PASS={env["PASS_DB"]}
-TIPO_DB={env["TIPO_DB"]}
-'''
-        File().save(plantillaOut + '.env', varEnv)
-        import shutil
-        shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
-        shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
-        import os #, stat
-        os.chmod(settings.TAREA_PATH + env['NAME_DB'], 0o777)
