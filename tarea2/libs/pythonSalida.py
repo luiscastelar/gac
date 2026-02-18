@@ -17,7 +17,7 @@ def generarIndex(metadatos, env)-> None:
     param env: variables de entorno con configuración de db y salida
     """
     settings.logging.debug(f'Variables entorno en {__file__}: {env}')
-    # TODO: Posible pagina índice de tablas
+    # DONE: Posible pagina índice de tablas
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     plantillaBoton = File().load(plantillaIn + 'boton.template')
@@ -36,8 +36,8 @@ def generarIndex(metadatos, env)-> None:
         botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
 
-        acciones += plantillaAccionBoton.replace('%%TEXTO%%', tabla.nombre) 
-    # FIXME: VOY POR AQUÍ  -> Me genera sólo una ventana (EN PYTHON)
+        acciones += plantillaAccionBoton.replace('%%TEXTO%%', tabla.nombre)
+
     ventanaMain = File().load(plantillaIn + env['indexFile']).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
     #ventanaMain = ventanaMain.replace('%%UI_TYPE%%', env['tipoSalida'])
@@ -72,15 +72,12 @@ def generarCRUD(tabla, db, env)-> None:
     
     copy(f'libs/db{TIPO_DB.capitalize()}.py',plantillaOut+'libs/db.py')
     copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
-    filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py']
+    #from os import listdir
+    #print(f'Archivos en plantilla libs: {listdir("libs/")}')
+    filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py', 'dbTipo.py']
     [ copy(f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
     
-
     plantillaTabla = File().load(plantillaIn + 'table.py')
-    #"mysql:host=$host;dbname=$db;charset=utf8mb4",
-    #$user,
-    #$pass,
-    #[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     #pdoType = db.comandosSQL['pdo_type'].replace("%%DB%%", db.name)
     #contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
     contenidoTabla = plantillaTabla.replace('%%DB%%', db.name)
@@ -161,10 +158,14 @@ def generarCRUD(tabla, db, env)-> None:
 
 
 def buildApp(env):
+    plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
+    salida = plantillaOut + 'crud.py'
+    printInfo(f"Lanzar aplicación con 'py {salida}'")
+    return None
+
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
-    if env['tipoSalida'] == 'php':
-        printInfo(f'Aplicación funcionando en http://localhost:{env["WWW_PORT"]}')
+    if env['tipoSalida'] == 'python':       
         varEnv = f'''HOST={env["SERVER_DB"]}
 DB={env["DOCKER_DB"]}
 USER={env["USER_DB"]}
