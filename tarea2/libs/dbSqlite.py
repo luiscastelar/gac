@@ -20,7 +20,7 @@ class DbSqlite(DbTipo):
         :return: Conexión a la base de datos
         """
         self.fileDB = self.TAREA_PATH + host
-        print(f"Conectando a la base de datos SQLite en '{self.fileDB}'...")
+        self.printInfo(f"Conectando a la base de datos SQLite en '{self.fileDB}'...")
         self.conn = sqlite3.connect(self.fileDB)
         self.name = host
         return self.conn
@@ -55,10 +55,10 @@ class DbSqlite(DbTipo):
 
         conexion = self.getConn(self.name, None, None, None)
         if conexion != None:
-            print(f'BBDD "{self.name}" creada nuevamente')
+            self.printInfo(f'BBDD "{self.name}" creada nuevamente')
             return conexion
         else:
-            print(f'Problemas creando la "{self.name}"')
+            self.printError(f'Problemas creando la "{self.name}"')
         return None
     
 
@@ -107,6 +107,42 @@ class DbSqlite(DbTipo):
                 arrayFila.append(ele)
             salida.append(arrayFila)
         return salida
+    
+
+    def execute(self, sql, valores: tuple)->int:
+        """
+        Es la ejecución de una consulta preparada.
+        
+        :param self: el objeto db
+        :param sql: la SENTENCIA
+        :param valores: los valores
+        :type valores: tupla
+        :return: las filas afectadas o -1 si error
+        :rtype: entero
+        """
+        cursor = self.conn.cursor()
+        afactadas =  0
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(sql, valores)            
+            self.conn.commit()           
+            afectadas = cursor.rowcount
+                    
+        except sqlite3.Error as err:
+            self.conn.rollback()
+            self.printError(f"Error en la inserción sobre '{self.name}': {err}")
+            afectadas = -1
+
+        finally:
+            if cursor:
+                cursor.close()
+                
+        if afectadas > 0:
+            self.printInfo(f"Insertados/Actualizados/Borrados {afectadas} registros sobre {self.name}.")
+        elif afectadas == 0:
+            self.printInfo(f"Ninguna fila afectada con la consulta '{sql}'.")
+        else:
+            self.printError(f"Ocurrió un error")
 
 
     def convertDataType(self, tipo:str )->str:
