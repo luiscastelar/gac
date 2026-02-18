@@ -1,38 +1,39 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk
 
 class CRUD:
     def __init__(self):
-        # Initialize the main window
+        # Inicio el panel raíz (root)
         self.root = tk.Tk()
         self.root.title("Ventana Principal")
-        #self.root.geometry("200x%%ALTURA%%")
-        self.create_index_widget()  # Start with the login widgets
+
+        # Inicio del panel principal
+        self.create_index_widget()  
 
     def create_index_widget(self):
-        # Create the login and registration widgets
+        # Borramos todo lo anterior
         self.clear_widgets()
 
-        # Botón en la ventana principal para abrir la ventana hija
+        # Botones en la ventana principal para abrir las ventanas hijas
 %%BOTONES%%
 
-        # Acciones de los botones
+        # Acciones de los botones (funciones callback)
 %%ACCIONES_DE_BOTONES%%
 
 
     def clear_widgets(self):
-        # Remove all widgets from the root window
+        # Borramos los widgtes ya ubicados en root
         for widget in self.root.winfo_children():
             widget.grid_forget()
 
     def run(self):
-        # Start the Tkinter main loop
+        # Comenzamos GUI de la App
         self.root.mainloop()
 
 
 # Check if the script is run directly (not imported)
 if __name__ == "__main__":
-    # Create an instance of CRUD
+    # Instanciamos la aplicación
     app = CRUD()
-    # Run the application
+    # La lanzamos
     app.run()
