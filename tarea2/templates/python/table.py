@@ -2,6 +2,7 @@ import os.path
 import tkinter as tk
 from tkinter import ttk
 import libs.dbComun as dbComun
+import libs.utils as utils
 import libs.db as db
 from libs.Env import Env
 import logging
@@ -25,37 +26,6 @@ def create_%%TABLA_NOMBRE%%_widgets(self):
 
     root = self.root
 
-    """-------------------------Creación del menú del CRUD-------------------------"""
-    """
-    #root = Tk()
-
-    from tkinter import Menu
-    barraMenu = Menu(root)
-    root.config(menu=barraMenu, width=1000, height=800)
-
-    bbddMenu = Menu(barraMenu, tearoff=0) #armando el menú
-                                #saca las lineas
-    bbddMenu.add_command(label="Conectar", command = conexionBBDD) #acá conecto con la base de datos
-    bbddMenu.add_command(label="Salir", command = salirDelPrograma)
-
-    borrarMenu = Menu(barraMenu, tearoff=0)
-    borrarMenu.add_command(label="Borrar campos", command = limpiarCuadros)
-
-    crudMenu = Menu(barraMenu, tearoff=0)
-    crudMenu.add_command(label="Crear", command = crear)
-    crudMenu.add_command(label="Leer", command = leer)
-    crudMenu.add_command(label="Actualizar", command = actualizar)
-    crudMenu.add_command(label="Borrar", command = borrar)
-
-    ayudaMenu = Menu(barraMenu, tearoff=0)
-    ayudaMenu.add_command(label="A cerca de", command = aCercaDe)
-
-    barraMenu.add_cascade(label="Base de datos", menu=bbddMenu)#acomodo los elementos en el menú
-    barraMenu.add_cascade(label="Borrar", menu=borrarMenu)
-    barraMenu.add_cascade(label="CRUD", menu=crudMenu)
-    barraMenu.add_cascade(label="Ayuda", menu=ayudaMenu)
-    """
-    
     # Create the main widgets for the book management interface
     self.clear_widgets()
     root.title(f"Gestión de %%TABLA_NOMBRE%%")
@@ -67,6 +37,7 @@ def create_%%TABLA_NOMBRE%%_widgets(self):
             from libs.db import DbMariadb as DB
         case 'sqlite':
             from libs.db import DbSqlite as DB
+
         case 'oracle-xe':
             #from libs import oracleDB as db
             pass
@@ -76,7 +47,10 @@ def create_%%TABLA_NOMBRE%%_widgets(self):
     db = DB(logger)  # Instanciamos el driver de la base de datos
 
     # DONE: 5. Comandos "normalizados" vía plantilla
-    db.comandosSQL = Env.get('templates/' + env['TIPO_DB'] + '/sql')
+    #pathToSql = 'templates/' + env['TIPO_DB'] + '/sql'
+    pathToSql = TAREA_PATH + 'templates/sql'
+    logger.debug(f'Path to sql:{pathToSql}')
+    db.comandosSQL = Env.get(pathToSql)
 
     # DONE: 6. Crear conexion
     conn = dbComun.getConexionDB(db, env)
@@ -85,24 +59,7 @@ def create_%%TABLA_NOMBRE%%_widgets(self):
     tabla = db.readSimpleList("SELECT * FROM %%TABLA_NOMBRE%%")
     logger.debug(tabla)
 
-    """ datos de ejemplo
-    tabla = [
-        { 'col1': 'Valor1', 'col2': 'Valor2', 'col3': 'Valor3' },
-        { 'col1': 'Valor4', 'col2': 'Valor5', 'col3': 'Valor6' },
-        { 'col1': 'Valor7', 'col2': 'Valor8', 'col3': 'Valor9' }
-    ]
-    """
-  
-    """ notebook de ejemplo
-    tabControl = ttk.Notebook(root)
-    create = ttk.Frame(tabControl)
-    read = ttk.Frame(tabControl)
-    tabControl.add(create, text='Tab 1')
-    tabControl.add(read, text='Tab 2')
-    ttk.Label(create, text="Welcome to GeeksForGeeks")  #.grid(column=0, row=0, padx=30, pady=30)  
-    ttk.Label(read, text="Lets dive into the world of computers")  #.grid(column=0, row=0, padx=30, pady=30)  
-    """
-    
+    """------------------ Creación del menú del CRUD ------------------------"""
     # Creamos el notebook (zona de etiquetas)
     tabControl = ttk.Notebook(root)
     #tabControl = ttk.Notebook(master=root, height=400, width=600, padding=10)
@@ -318,3 +275,9 @@ def initLoggin():
                             format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s''')
     return logging
 logger = initLoggin()
+
+# Dado que reaprobechamos librerías entre app generadora y final debemos realizar
+# algunas correcciones:
+settings = {}
+settings['logging'] = logger
+utils.settings = settings
