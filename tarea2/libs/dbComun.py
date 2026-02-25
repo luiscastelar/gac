@@ -2,7 +2,6 @@ from . import utils
 from .baseDatos import BaseDatos
 from .tabla import Tabla
 from .columna import Columna
-import os
 
 """
 Módulo de utilidades relativas a bases de datos
@@ -96,15 +95,17 @@ def generacionDeMetadatos(db):
                 ]
 
     # Rellenamos la estructura
+    INDEX_TABLE_NAME = atributos.index('TABLE_NAME')
+    INDEX_COLUMN_NAME = atributos.index('COLUMN_NAME')
     for tab in db.readSimpleList(sql):
-        nombreTabla = tab[0]
+        nombreTabla = tab[INDEX_TABLE_NAME]
 
         # Captura de columnas normalizada
         sql = comandosSQL['show_columns'].replace('%%TABLA%%', nombreTabla)
         columnas = db.readSimpleList(sql)
         tabla = Tabla(nombreTabla)
         for col in columnas:
-            columnaNombre = col[1]
+            columnaNombre = col[INDEX_COLUMN_NAME]
             columna = Columna(columnaNombre)
             for i in range(0, len(col)):
                 k = atributos[i]

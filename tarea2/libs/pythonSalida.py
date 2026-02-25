@@ -3,14 +3,16 @@ from .utils import printInfo
 import shutil
 from os import mkdir
 
+# Var globales
 settings = None
 logging = None
 
-def generarIndex(metadatos, env)-> None:
+
+def generarIndex(metadatos, env) -> None:
     """
     Genera la página índice de la aplicación de salida mediante sustitución
     con plantilla común y fragmentos por tabla
-    
+
     param metadatos: metadatos de la base de datos
     param env: variables de entorno con configuración de db y salida
     """
@@ -26,7 +28,8 @@ def generarIndex(metadatos, env)-> None:
     botones = ''
     acciones = ''
     for i, tabla in enumerate(metadatos.tablas):
-        boton = plantillaBoton.replace('%%FILA%%', str(i+1))  # dejamos el hueco para el mensaje superior
+        boton = plantillaBoton.replace('%%FILA%%', str(i+1))
+        # dejamos el hueco para el mensaje superior
         botones += boton.replace('%%TEXTO%%', tabla.nombre)+'\n'
         print(f'-> {tabla.nombre}')
 
@@ -35,6 +38,7 @@ def generarIndex(metadatos, env)-> None:
     ventanaMain = File().load(plantillaIn + env['indexFile']).replace('%%BOTONES%%', botones)
     ventanaMain = ventanaMain.replace('%%ALTURA%%', str(alturaVentana))
     ventanaMain = ventanaMain.replace('%%ACCIONES_DE_BOTONES%%', acciones)
+
     # DB: %%TIPO_DB%% ➡️ UI: %%UI_TYPE%%
     ventanaMain = ventanaMain.replace('%%UI_TYPE%%', env['tipoSalida'])
     ventanaMain = ventanaMain.replace('%%TIPO_DB%%', env['TIPO_DB'])
@@ -42,12 +46,10 @@ def generarIndex(metadatos, env)-> None:
     File().save(plantillaOut + env['indexFile'], ventanaMain)
 
 
-
-def generarCRUD(tabla, db, env)-> None:
+def generarCRUD(tabla, db, env) -> None:
     logging.info(f'Generando CRUD para tabla {tabla.nombre}...')
     logging.info(f'DB: {db.name}, Tipo de salida: {env["tipoSalida"]}')
     HOST = env["SERVER_DB"]
-    DB = env["DOCKER_DB"]
     USER = env["USER_DB"]
     PASS = env["PASS_DB"]
     TIPO_DB = env["TIPO_DB"]
@@ -61,17 +63,21 @@ def generarCRUD(tabla, db, env)-> None:
     except:
         pass
     try:
-        mkdir(plantillaOut +'templates/')
+        mkdir(plantillaOut + 'templates/')
     except:
         pass
 
     import os
     os.listdir(settings.TAREA_PATH)
-    shutil.copy(settings.TAREA_PATH + f'libs/db{TIPO_DB.capitalize()}.py', plantillaOut+'libs/db.py')
-    shutil.copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
+    shutil.copy(settings.TAREA_PATH + f'libs/db{TIPO_DB.capitalize()}.py', plantillaOut + 'libs/db.py')
+    shutil.copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut + 'templates/')
 
-    filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py', 'dbTipo.py']
-    [ shutil.copy(settings.TAREA_PATH + f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
+    filesToCopy = [
+                    'dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py',
+                    'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py',
+                    'dbTipo.py'
+                    ]
+    [shutil.copy(settings.TAREA_PATH + f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
     plantillaTabla = File().load(plantillaIn + 'table.py')
     contenidoTabla = plantillaTabla.replace('%%DB%%', db.name)
     contenidoTabla = contenidoTabla.replace('%%HOST%%', HOST)

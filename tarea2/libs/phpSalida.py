@@ -1,14 +1,16 @@
 from .contentOfFile import File
 from .utils import printInfo
 
+# Variables globales
 settings = None
 logging = None
 
-def generarIndex(metadatos, env)-> None:
+
+def generarIndex(metadatos, env) -> None:
     """
     Genera la página índice de la aplicación de salida mediante sustitución
     con plantilla común y fragmentos por tabla
-    
+
     param metadatos: metadatos de la base de datos
     param env: variables de entorno con configuración de db y salida
     """
@@ -34,19 +36,17 @@ def generarIndex(metadatos, env)-> None:
     File().save(plantillaOut + env['indexFile'], ventanaMain)
 
 
-def generarCRUD(tabla, db, env)-> None:
+def generarCRUD(tabla, db, env) -> None:
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     plantillaTabla = File().load(plantillaIn + 'tabla.' + env['tipoSalida'])
-    #"mysql:host=$host;dbname=$db;charset=utf8mb4",
-    #$user,
-    #$pass,
-    #[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+
     pdoType = db.comandosSQL['pdo_type'].replace("%%DB%%", db.name)
     contenidoTabla = plantillaTabla.replace('%%PDO_TYPE%%', pdoType)
     contenidoTabla = contenidoTabla.replace('%%UI_TYPE%%', env['tipoSalida'])
     contenidoTabla = contenidoTabla.replace('%%TIPO_DB%%', env['TIPO_DB'])
     contenidoTabla = contenidoTabla.replace('%%TABLA_NOMBRE%%', tabla.nombre)
+
     # Columnas
     nombresDeCampos = ''
     bindCampos = ''
@@ -113,7 +113,7 @@ def buildApp(env):
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     if env['tipoSalida'] == 'php':
         printInfo(f'''Aplicación funcionando en http://localhost:{env["WWW_PORT"]}
-        
+
         ***********************************************************************************************
         * Verifica que tu servidor web local está corriendo mediante el contenedor docker facilitado. *
         * En caso contrario puedes lanzarlo desde cli mediante el comando `docker compose up -d`.     *
@@ -129,5 +129,5 @@ TIPO_DB={env["TIPO_DB"]}
         import shutil
         shutil.copytree(plantillaIn + '/css', plantillaOut + 'css', dirs_exist_ok=True)
         shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
-        import os #, stat
+        import os  # , stat
         os.chmod(settings.TAREA_PATH + env['NAME_DB'], 0o777)

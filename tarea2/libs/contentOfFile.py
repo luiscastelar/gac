@@ -18,8 +18,8 @@ class File():
         """
         Retorna todo el contenido del archivo o da error y finaliza programa
         """
-
-        if len(filepath) == 0:
+        EMPTY = 0  # constante
+        if len(filepath) == EMPTY:
             filepath = self.getRuta()
 
         try:
@@ -68,7 +68,8 @@ class File():
         return filepath
 
     def esRutaAbsoluta(self, ruta: str) -> bool:
-        if ruta[0] == '/':
+        FIRST_CHAR = 0  # constante
+        if ruta[FIRST_CHAR] == '/':
             # Ruta absoluta en Unix
             return True
 
