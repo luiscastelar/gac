@@ -108,13 +108,4 @@ def initLoggin():
                             format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s''')
     return logging
 
-    if LOGGING == logging.INFO:
-        logging.basicConfig(level = LOGGING,
-                            format='%(message)s')
-    else:
-        logging.basicConfig(filename = FILE_LOGGIN,
-                            filemode = 'a',
-                            level = LOGGING,
-                            format='''%(asctime)s - f:%(module)s:%(lineno)d [%(levelname)s]:\n%(message)s''')
-    return logging
-loggin = initLoggin()
+logger = initLoggin()
