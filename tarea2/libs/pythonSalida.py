@@ -6,8 +6,6 @@ from os import mkdir
 settings = None
 logging = None
 
-copy = lambda src, dst: shutil.copy(src, dst)
-
 def generarIndex(metadatos, env)-> None:
     """
     Genera la página índice de la aplicación de salida mediante sustitución
@@ -52,27 +50,28 @@ def generarCRUD(tabla, db, env)-> None:
     DB = env["DOCKER_DB"]
     USER = env["USER_DB"]
     PASS = env["PASS_DB"]
-    TIPO_DB = env["TIPO_DB"]    
+    TIPO_DB = env["TIPO_DB"]
 
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
 
     # Importo el driver db y librerías creadas
     try:
-        mkdir(plantillaOut+ 'libs/')
+        mkdir(plantillaOut + 'libs/')
     except:
         pass
     try:
-        mkdir(plantillaOut+'templates/')
+        mkdir(plantillaOut +'templates/')
     except:
         pass
-    
-    copy(f'libs/db{TIPO_DB.capitalize()}.py',plantillaOut+'libs/db.py')
-    copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
+
+    import os
+    os.listdir(settings.TAREA_PATH)
+    shutil.copy(settings.TAREA_PATH + f'libs/db{TIPO_DB.capitalize()}.py', plantillaOut+'libs/db.py')
+    shutil.copy(settings.TAREA_PATH + 'templates/' + TIPO_DB + '/sql', plantillaOut+'templates/')
 
     filesToCopy = ['dbComun.py', 'Env.py', 'contentOfFile.py', 'TUI.py', 'utils.py', 'baseDatos.py', 'tabla.py', 'columna.py', 'dbTipo.py']
-    [ copy(f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
-    
+    [ shutil.copy(settings.TAREA_PATH + f'libs/{dir}', plantillaOut+'libs/') for dir in filesToCopy]
     plantillaTabla = File().load(plantillaIn + 'table.py')
     contenidoTabla = plantillaTabla.replace('%%DB%%', db.name)
     contenidoTabla = contenidoTabla.replace('%%HOST%%', HOST)

@@ -7,11 +7,16 @@ def printError(msg, err=None):
     :param msg: texto
     :param err: código de salida
     """
-    if err == None:
+    if err is None:
         err = -1
-    settings.logging.error(msg)
-    print(msg)
-    exit(err)
+    try: 
+        settings.logging.error(msg)
+        print(msg)
+        exit(err)
+    except:
+        import inspect
+        print(f"""Error: No se pudo realizar el logging de datos.
+Contacta con el administrador. ({__file__}:{inspect.currentframe().f_lineno})""")
 
 def printInfo(msg):
     """

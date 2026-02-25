@@ -7,19 +7,48 @@ import libs.TUI as TUI
 import libs.utils as utils
 import settings
 import libs.dbComun as dbComun
+import sys
+
+# ---------------------------------------------------------------------
+# Constantes de sistema
+# ---------------------------------------------------------------------
+# Constantes de posción de argumentos de entrada
+ARG_FILE_SCRIPT = 0
+ARG_DB_SELECT = 1
+ARG_OUT_SELECT = 2
+
+# Constantes de selección de argumentos
+DEFAULT = 0
+DB_MARIA_DB = 1
+DB_SQLITE = 2
+OUT_PYTHON = 1
+OUT_PHP = 2
+CORRECTOR_ARRAY = 1  # los arrays comienzan por 0 por lo que debemos sumar el corrector en las comparaciones posicionales
+
+# Constantes de operación sobre db
+NO_SOPORTADO = 0
+DROP_DB = 1
+CREATE_DB = 2
+LOAD_SCRIPT = 3
+
 
 # ---------------------------------------------------------------------
 # Variables globales
 # ---------------------------------------------------------------------
 logging = None
 
+
 # ---------------------------------------------------------------------
 # Main()
 # ---------------------------------------------------------------------
 def main():
     global logging
-    
-    # DONE: 1. Iniciazilación de variables globales
+
+    # Presets si existen
+    presetDB = int(sys.argv[ARG_DB_SELECT]) if len(sys.argv) >= (ARG_DB_SELECT+CORRECTOR_ARRAY) else DEFAULT
+    presetOut = int(sys.argv[ARG_OUT_SELECT]) if len(sys.argv) >= (ARG_OUT_SELECT+CORRECTOR_ARRAY) else DEFAULT
+
+    # DONE: 1. Inicialización de variables globales
     logging = initGlobalSettings()
     logging.info('0. Inicio del programa')
 
@@ -27,11 +56,11 @@ def main():
     # - vacio o 0 para preguntar por consola
     # - 1 para cargar dump-gac2.sql
     # - 2 para cargar db-sqlite.sql
-    sql, tipoDB = loadDDL(2)
+    sql, tipoDB = loadDDL(presetDB)
 
     # DONE: 3. Carga de variables de entorno comunes a todos los tipos de salida
     variablesDeEntorno = loadEnvironmentVar(tipoDB)
-    
+
     # DONE: 4. Carga driver
     db = dbComun.getDriverDB(tipoDB)
 
@@ -40,15 +69,15 @@ def main():
 
     # DONE: 6. Import en db pruebas
     dbComun.getConexionDB(db, variablesDeEntorno)
-    
+
     ope = TUI.operacionesDeImportacion()
-    if ope <= 0:
-        utils.printError(f'Operación {ope} sobre db no disponible', 1)
-    if ope == 1:
+    if ope <= NO_SOPORTADO:
+        utils.printError(f'Operación {ope} sobre db no disponible')
+    if ope == DROP_DB:
         db.dropDB()
-    if ope <= 2:
+    if ope <= CREATE_DB:
         db.createDB(variablesDeEntorno['NAME_DB'])
-    if ope <= 3:
+    if ope <= LOAD_SCRIPT:
         pass
 
     # DONE: 7. Importar datos
@@ -61,18 +90,18 @@ def main():
     # - vacio o 0 para preguntar por consola
     # - 1 para salida python
     # - 2 para salida php
-    tipoSalida, indexFile = TUI.eleccionDeSalida(2)
+    tipoSalida, indexFile = TUI.eleccionDeSalida(presetOut)
     variablesDeEntorno.update({
         'tipoSalida': tipoSalida,
         'indexFile': indexFile
     })
     logging.debug(f'Tipo de salida: {tipoSalida}')
-    
+
     # DONE: 10. Captura de config de servidor según tipo de salida
     variablesDeEntorno.update(
         Env.get(settings.TAREA_PATH + 'config/' + tipoSalida + '/config')
     )
-    
+
     logging.debug(f'Datos conexión a variablesDeEntorno: {variablesDeEntorno}')
 
     # DONE: 11. Importacion de driver salida según tipo (DAO)
@@ -91,14 +120,14 @@ def main():
     out.buildApp(variablesDeEntorno)
 
     # PDTE: 15. Gestión de errores de consultas: insert, update, delete
-    
+
 
 # ----------------------------------------------------------------------
 # Funciones auxiliares
 # ----------------------------------------------------------------------
 def initGlobalSettings():
     # DONE: 1. Cargamos las variables globales en settings
-    logging = settings.logging
+    logging = settings.logger
     TUI.settings = settings
     utils.settings = settings
     dbComun.settings = settings
@@ -106,7 +135,7 @@ def initGlobalSettings():
     return logging
 
 
-def loadDDL(tipo=0):
+def loadDDL(tipo=DEFAULT):
     # DONE: 2. Captura DDL de entrada
     txt = '''Archivos de muestra preparados:
   - ejemplos/dump-gac2.sql: DDL de ejemplo con tablas de alumnos, cursos y matrículas (MariaDB)
@@ -114,13 +143,14 @@ def loadDDL(tipo=0):
 '''
     print(txt)
     match tipo:
-        case 0:
+        case 0:  # DEFAULT
             file = settings.TAREA_PATH + input('Selecciona el archivo SQL a analizar: ')
-        case 1:
+        case 1:  # MARIA_DB
             file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
-        case 2:
+        case 2:  # SQLITE
             file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
     sql = File().load(file)
+    # ¿El script tiene contenido?
     if len(sql) > 0:
         print(f'1. Archivo {file} cargado correctamente.')
     else:
@@ -142,7 +172,7 @@ def loadDDL(tipo=0):
     return sql, tipoDB
 
 
-def loadEnvironmentVar(tipoDB: str)->dict:
+def loadEnvironmentVar(tipoDB: str) -> dict:
     # DONE: 3. Captura de variables de entorno comunes a todos los tipos de salida
     variablesDeEntorno = {}
     variablesDeEntorno['TIPO_DB'] = tipoDB

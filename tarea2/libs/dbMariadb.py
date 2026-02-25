@@ -1,25 +1,50 @@
 from .dbTipo import DbTipo
 import mysql.connector
 
+
 class DbMariadb(DbTipo):
+    """
+    Implementación del DAO de gestión de la base de datos.
+    """
+
     def __init__(self, logging=None):
-        super().__init__(logging)
+        super().__init__(logging)  # llamamos al constructor del padre
 
+    def getConn(
+            self,
+            host='localhost',
+            port=None,
+            user=None,
+            password=None,
+            dbName=None
+            ):
+        """Estandarizamos la conexión a bbdd
 
-    def getConn(self, host='localhost', port=None, user=None, password=None, dbName=None):
-        "Estandarizamos la conexión a bbdd"
+        :param host: Host de la base de datos
+        :param port: Puerto de la base de datos
+        :param user: Usuario de la base de datos
+        :param password: Contraseña de la base de datos
+        :param dbName: Nombre de la base de datos
+        :return: Conexión a la base de datos
+        """
         if (host == 'mariadb'):
+            # Corrección necesaria para conexiones vía docker
             host = 'localhost'
-        self.conn = mysql.connector.connect(host=host, port=port, user=user, password=password, database=dbName)
+        self.conn = mysql.connector.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=dbName)
         self.name = dbName
         return self.conn
 
-
-    def dropDB(self):    
+    def dropDB(self):
         """
         Elimina una base de datos si existe.
 
-        :return: False si no se ha podido eliminar la base de datos, True si se ha eliminado correctamente
+        :return: False si no se ha podido eliminar la base de datos, True si se
+                 ha eliminado correctamente
         """
         cursor = None
         error = False
@@ -40,12 +65,10 @@ class DbMariadb(DbTipo):
 
         return True if not error else False
 
-
-
     def createDB(self, dbName):
         """
         Crea una base de datos si no existe.
-        
+
         :param dbName: nombre de la base de datos
         :return: La conexión actual
         """
@@ -60,7 +83,7 @@ class DbMariadb(DbTipo):
             )
             self.conn.commit()
             self.printInfo(f"Base de datos '{dbName}' creada o ya existente.")
-                    
+
         except mysql.connector.Error as err:
             self.printError(f"Error al crear la base de datos '{dbName}': {err}")
             error = True
@@ -68,12 +91,17 @@ class DbMariadb(DbTipo):
         finally:
             if cursor:
                 cursor.close()
-        
+
         # ¿La db es diferente?
         actual = self.conn.database
         if actual != dbName:
             self.printInfo(f"Cambiando a la base de datos '{dbName}'...")
-            newConn = mysql.connector.connect(host=self.conn._host, port=self.conn._port, user=self.conn._user, password=self.conn._password, database=dbName)
+            newConn = mysql.connector.connect(
+                host=self.conn._host,
+                port=self.conn._port,
+                user=self.conn._user,
+                password=self.conn._password,
+                database=dbName)
             self.conn.close()  # Cerramos la conexión anterior
             self.conn = newConn
             self.name = dbName
@@ -81,19 +109,18 @@ class DbMariadb(DbTipo):
             newConn = self.conn
 
         return newConn if not error else None
-    
 
     def loadFromSQL(self, sql):
         """
         Ejecuta un fichero SQL completo (DDL + DML) sobre una conexión MySQL.
 
         :param sql: contenido del fichero sql
-        :return: False si no se ha podido ejecutar el script SQL, True si se ha ejecutado correctamente
+        :return: False si no se ha podido ejecutar el script SQL, True si se ha
+                 ejecutado correctamente
         """
         cursor = self.conn.cursor()
         error = False
         try:
-            #cursor.execute(f'USE {db};')
             statement = ""
             for line in sql.splitlines():
                 line = line.strip()
@@ -110,7 +137,7 @@ class DbMariadb(DbTipo):
                     statement = ""
 
             self.conn.commit()
-            self.printInfo(f"Script sql ejecutado correctamente.")
+            self.printInfo("Script sql ejecutado correctamente.")
 
         except mysql.connector.Error as err:
             self.conn.rollback()
@@ -119,17 +146,16 @@ class DbMariadb(DbTipo):
 
         finally:
             cursor.close()
-        
+
         if error:
             raise Exception("Error ejecutando el script SQL")
         else:
             return True
 
-
-    def readSimpleList(self, sql:str )->list[list[str]]:
+    def readSimpleList(self, sql: str) -> list[list[str]]:
         """
         Select ... -> lista (filas) de listas (columnas)
-        
+
         :param sql: consulta SQL a ejecutar
         :type sql: str
         :return: lista de listas con los resultados de la consulta SQL
@@ -140,12 +166,11 @@ class DbMariadb(DbTipo):
         for ele in lista:
             simpleList.append(self.dictToList(ele))
         return simpleList
-    
 
-    def execute(self, sql, valores: tuple)->int:
+    def execute(self, sql, valores: tuple) -> int:
         """
         Es la ejecución de una consulta preparada.
-        
+
         :param self: el objeto db
         :param sql: la SENTENCIA
         :param valores: los valores
@@ -154,13 +179,13 @@ class DbMariadb(DbTipo):
         :rtype: entero
         """
         cursor = self.conn.cursor()
-        afactadas =  0
+        afectadas = 0
         try:
             cursor = self.conn.cursor()
-            cursor.execute(sql, valores)            
-            self.conn.commit()           
+            cursor.execute(sql, valores)
+            self.conn.commit()
             afectadas = cursor.rowcount
-                    
+
         except mysql.connector.Error as err:
             self.printError(f"Error en la inserción sobre '{self.conn.database}': {err}")
             afectadas = -1
@@ -168,36 +193,17 @@ class DbMariadb(DbTipo):
         finally:
             if cursor:
                 cursor.close()
-                
+
         if afectadas > 0:
             self.printInfo(f"Insertados/Actualizados/Borrados {afectadas} registros sobre {self.conn.database}.")
         elif afectadas == 0:
             self.printInfo(f"Ninguna fila afectada con la consulta '{sql}'.")
         else:
-            self.printError(f"Ocurrió un error")
-
-
-    def convertDataType(self, tipo:str )->str:
-        """
-        Convierte un tipo de dato SQL a un tipo de dato Python.
-        
-        :param tipo: tipo en SQL a convertir
-        :type tipo: str
-        :return: tipo de dato en Python equivalente al tipo de dato SQL proporcionado
-        :rtype: str
-        """
-        match(tipo):
-            case 'int':
-                return 'number'
-            case 'varchar':
-                return 'text'
-            case _:
-                return 'text'
-            
+            self.printError("Ocurrió un error")
 
     def read(self, sql):
         """
-        Devuelve todas las filas
+        Devuelve una lista de [ diccionario {atributo: valor} ]
         """
         cursor = self.conn.cursor(buffered=True, dictionary=True)
         filasLeidas = []
@@ -209,15 +215,14 @@ class DbMariadb(DbTipo):
             cursor.close()
         return filasLeidas
 
-
     def dictToList(self, ele):
         """
-        De un diccionario, devuelve una lista con los valores del diccionario (sin las claves).
-        
+        De un diccionario, devuelve una lista con los valores del diccionario
+        (sin las claves).
+
         :param ele: elemento a convertir
         """
         lista = []
-        #for k, v in ele.items():
         for v in ele.values():
             lista.append(v)
         return lista

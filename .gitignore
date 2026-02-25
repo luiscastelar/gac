@@ -11,3 +11,4 @@ tarea2/infra
 virtualEnv/
 
 *.db.old
+*.db

@@ -112,7 +112,13 @@ def buildApp(env):
     plantillaIn = settings.TAREA_PATH + 'templates/' + env['tipoSalida'] + '/'
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     if env['tipoSalida'] == 'php':
-        printInfo(f'Aplicación funcionando en http://localhost:{env["WWW_PORT"]}')
+        printInfo(f'''Aplicación funcionando en http://localhost:{env["WWW_PORT"]}
+        
+        ***********************************************************************************************
+        * Verifica que tu servidor web local está corriendo mediante el contenedor docker facilitado. *
+        * En caso contrario puedes lanzarlo desde cli mediante el comando `docker compose up -d`.     *
+        ***********************************************************************************************
+        ''')
         varEnv = f'''HOST={env["SERVER_DB"]}
 DB={env["DOCKER_DB"]}
 USER={env["USER_DB"]}

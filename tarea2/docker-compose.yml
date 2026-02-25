@@ -20,18 +20,6 @@ services:
     ports:
       - 3306:3306
 
-  oracle-xe:
-    env_file: ./config/oracle/config 
-    user: "${ID_USUARIO}:${ID_USUARIO}"
-    ports:
-      - 1521:1521
-    volumes:
-      - ./infra/oracle-xe:/u01/app/oracle/oradata 
-      - ./infra/scripts:/scripts
-    #image: gvenzl/oracle-xe:11
-    image: gvenzl/oracle-xe:21
-
-
   nginx:
     image: nginx:latest
     ports:
