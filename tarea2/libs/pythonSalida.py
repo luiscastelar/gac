@@ -159,4 +159,14 @@ def buildApp(env):
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     salida = plantillaOut + 'crud.py'
     printInfo(f"Lanzar aplicación con 'python3 {salida}'")
+
+    # Primera vez copiar bbdd si es sqlite
+    import os
+    file = env["SERVER_DB"]
+    src = ''+file
+    dst = f'salida/{env["tipoSalida"]}/{file}'
+    if env["TIPO_DB"] == 'sqlite':
+        if not os.path.exists(dst):
+            shutil.copy(src, dst)
+            print(f"Se instala la base de datos sqlite en {dst}")
     return None

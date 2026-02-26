@@ -131,3 +131,12 @@ TIPO_DB={env["TIPO_DB"]}
         shutil.copytree(plantillaIn + '/js', plantillaOut + 'js', dirs_exist_ok=True)
         import os  # , stat
         os.chmod(settings.TAREA_PATH + env['NAME_DB'], 0o777)
+
+        # Primera vez copiar bbdd si es sqlite
+        file = env["SERVER_DB"]
+        src = ''+file
+        dst = f'salida/{env["tipoSalida"]}/{file}'
+        if env["TIPO_DB"] == 'sqlite':
+            if not os.path.exists(dst):
+                shutil.copy(src, dst)
+                print(f"Se instala la base de datos sqlite en {dst}")
