@@ -84,12 +84,15 @@ def eleccionDeSalida(tipo) -> tuple[str, str]:
         0. Otro
         '''
     match tipo:
-        case 0:
+        case 0:  # Interactivo
             elec = int(input(txt))
-        case 1:
+        case 1:  # python
             elec = 1
-        case 2:
+        case 2:  # php
             elec = 2
+        case _:  # Elección NO válida
+            print(f'Selección NO válida {tipo}')
+            exit(1)
 
     match elec:
         case 1:

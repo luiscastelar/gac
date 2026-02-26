@@ -158,5 +158,5 @@ def generarCRUD(tabla, db, env) -> None:
 def buildApp(env):
     plantillaOut = settings.TAREA_PATH + 'salida/' + env['tipoSalida'] + '/'
     salida = plantillaOut + 'crud.py'
-    printInfo(f"Lanzar aplicación con 'py {salida}'")
+    printInfo(f"Lanzar aplicación con 'python3 {salida}'")
     return None

@@ -1,4 +1,3 @@
--- sqlite3
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE `alumnos` (
