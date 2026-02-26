@@ -16,6 +16,7 @@ import sys
 ARG_FILE_SCRIPT = 0
 ARG_DB_SELECT = 1
 ARG_OUT_SELECT = 2
+ARG_OP_OVER_DB = 3
 
 # Constantes de selección de argumentos
 DEFAULT = 0
@@ -47,6 +48,7 @@ def main():
     # Presets si existen
     presetDB = int(sys.argv[ARG_DB_SELECT]) if len(sys.argv) >= (ARG_DB_SELECT+CORRECTOR_ARRAY) else DEFAULT
     presetOut = int(sys.argv[ARG_OUT_SELECT]) if len(sys.argv) >= (ARG_OUT_SELECT+CORRECTOR_ARRAY) else DEFAULT
+    presetOP = int(sys.argv[ARG_OP_OVER_DB]) if len(sys.argv) >= (ARG_OP_OVER_DB+CORRECTOR_ARRAY) else None
 
     # DONE: 1. Inicialización de variables globales
     logging = initGlobalSettings()
@@ -70,7 +72,7 @@ def main():
     # DONE: 6. Import en db pruebas
     dbComun.getConexionDB(db, variablesDeEntorno)
 
-    ope = TUI.operacionesDeImportacion()
+    ope = TUI.operacionesDeImportacion() if presetDB is None else presetOP
     if ope <= NO_SOPORTADO:
         utils.printError(f'Operación {ope} sobre db no disponible')
     if ope == DROP_DB:
@@ -149,6 +151,8 @@ def loadDDL(tipo=DEFAULT):
             file = settings.TAREA_PATH + 'ejemplos/dump-gac2.sql'
         case 2:  # SQLITE
             file = settings.TAREA_PATH + 'ejemplos/db-sqlite.sql'
+        case _:  # DDL directo por consola
+            file = tipo
     sql = File().load(file)
     # ¿El script tiene contenido?
     if len(sql) > 0:
